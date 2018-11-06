@@ -411,6 +411,7 @@ var Kgr = function () {
             var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10(task, conf) {
                 var _this3 = this;
 
+                var files;
                 return _regenerator2.default.wrap(function _callee10$(_context10) {
                     while (1) {
                         switch (_context10.prev = _context10.next) {
@@ -441,7 +442,15 @@ var Kgr = function () {
                                         }
                                     }, _callee8, _this3);
                                 })));
-                                _gulp3.default.watch([], function (event) {
+                                files = [conf.__filename];
+
+                                (0, _each3.default)(conf.replace, function (file) {
+                                    file.source = !file.source ? file.source : (0, _core.getAbsPath)(file.source, _path2.default.dirname(conf.__filename));
+                                    if (_fs2.default.existsSync(file.source)) {
+                                        files.push(file.source);
+                                    }
+                                });
+                                _gulp3.default.watch(files, function (event) {
                                     console.log('' + _chalk2.default.yellow('File ' + event.path + ' was ' + event.type + ' , running tasks...'));
                                     (0, _gulpSequence2.default)('run')((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9() {
                                         return _regenerator2.default.wrap(function _callee9$(_context9) {
@@ -463,7 +472,7 @@ var Kgr = function () {
                                     })));
                                 });
 
-                            case 4:
+                            case 6:
                             case 'end':
                                 return _context10.stop();
                         }

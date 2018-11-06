@@ -157,7 +157,14 @@ class Kgr {
             await runShell(conf.start, {cwd: conf.__dest});
             console.log(`${chalk.green.underline(`success : ${conf.__dest}`)}`);
         })
-        gulp.watch([], (event) => {
+        const files = [conf.__filename]
+        _.each(conf.replace, (file) => {
+            file.source = !file.source ? file.source : getAbsPath(file.source, path.dirname(conf.__filename));
+            if (fs.existsSync(file.source)) {
+                files.push(file.source)
+            }
+        });
+        gulp.watch(files, (event) => {
             console.log(`${chalk.yellow(`File ${event.path} was ${event.type} , running tasks...`)}`);
             gulpSequence('run')(async () => {
                 await runShell(conf.restart, {cwd: conf.__dest});
