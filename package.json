@@ -14,6 +14,9 @@
     "release-minor": "npm run build && npm version minor && git push --tags && git push && npm publish",
     "release-major": "npm run build && npm version major && git push --tags && git push && npm publish"
   },
+  "bin": {
+    "kgr": "dist/bin/kgr.js"
+  },
   "author": "wangjianliang",
   "license": "MIT",
   "devDependencies": {
