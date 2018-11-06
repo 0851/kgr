@@ -17,32 +17,33 @@ function getAbsPath(output, base) {
     return output
 }
 
-function runShell(cmd, options={}) {
+function runShell(cmd, options = {}) {
     if (!cmd) {
         return;
     }
     log(`run shell cmd : ${cmd}`)
     return new Promise(function (resolve, reject) {
-        const child = exec(cmd,{
+        const child = exec(cmd, {
             ...{
-                maxBuffer:20000*1024,
-                env : {
+                maxBuffer: 20000 * 1024,
+                env: {
                     ...{
                         FORCE_COLOR: 1,
                         COLOR: 'always',
                         NPM_CONFIG_COLOR: 'always'
                     },
                     ...process.env,
-                    ...(options.env||{})
+                    ...(options.env || {})
                 }
             },
             ...options
-        },(error, stdout, stderr)=>{
+        }, (error, stdout, stderr) => {
             if (error) {
+                console.log(cmd, error)
                 reject(error);
                 return;
-          }
-          resolve([stdout,stderr])
+            }
+            resolve([stdout, stderr])
         })
         console.log(`---exec ${cmd} start--- `);
         child.stdout.pipe(process.stdout);

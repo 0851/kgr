@@ -15,7 +15,7 @@ module.exports = function () {
             //项目名 , 如没有output参数时,做导出目录的目录名
             name: 'components',
             //需要执行的初始化命令
-            bash: 'npm install lodash -verbose',
+            bash: 'npm install lodash --verbose',
             //启动命令 ,mode dev时执行
             start: 'ls',
             //文件改变后命令 , 空代表改变文件后不触发操作 , mode dev时执行

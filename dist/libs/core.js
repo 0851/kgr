@@ -138,6 +138,7 @@ function runShell(cmd) {
             }, process.env, options.env || {})
         }, options), function (error, stdout, stderr) {
             if (error) {
+                console.log(cmd, error);
                 reject(error);
                 return;
             }

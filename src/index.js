@@ -70,8 +70,8 @@ class Kgr {
         const _init = async () => {
             await runShell(`rm -rf ${clonePath} && git clone -b ${version} ${url} ${clonePath} && cd ${clonePath} && rm -rf .git && echo 'success' > .kge_success`);
             await runShell(conf.bash, {cwd: clonePath});
-            await runShell(`cd ${clonePath} && tar -zcvf ${tarName} ./`)
-        }
+            await runShell(`cd ${clonePath} && tar -zcf ${tarName} ./`)
+        };
         if (args.init) {
             await _init();
         }
@@ -80,8 +80,8 @@ class Kgr {
         }
 
         const _copy = async () => {
-            await runShell(`mkdir -p ${tmpPath} && cd ${tmpPath} && tar -zxvf ${path.resolve(clonePath, tarName)}`)
-        }
+            await runShell(`mkdir -p ${tmpPath} && cd ${tmpPath} && tar -zxf ${path.resolve(clonePath, tarName)}`)
+        };
         if (args.copy) {
             await _copy()
         }
@@ -134,11 +134,17 @@ class Kgr {
             }).join('&&')
             return await runShell(cmd)
         })
-        gulp.task('pipe', async () => {
+        gulp.task('pipe', (done) => {
             console.log(`${chalk.green(`run pipe task...`)}`);
-            return gulp.src([tmpPath + '/**/*'])
+            const stream = gulp.src([tmpPath + '/**/*'])
                 .pipe(gulpCached(`${conf.name}:${version}`))
-                .pipe(gulp.dest('' + destPath));
+                .pipe(gulp.dest(`${destPath}`))
+            stream.on('end', () => {
+                done()
+            })
+            stream.on('error', function (err) {
+                done(err);
+            });
         })
         return [gulp.task('run', (done) => {
             return gulpSequence(['add', 'remove', 'replace'], 'pipe', done)
