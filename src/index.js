@@ -8,7 +8,7 @@ import gulp from 'gulp';
 import gulpSequence from 'gulp-sequence';
 import gulpCached from 'gulp-cached';
 import {readConfig} from './libs/parse-config';
-import {getAbsPath} from './libs/core';
+import {getAbsPath, tasks, runShell} from './libs/core';
 import pkg from '../package.json'
 
 const log = debug(pkg.name);
@@ -56,24 +56,144 @@ class Kgr {
         return matched;
     }
 
-    init() {
+    async init(conf) {
+        const args = this.getArgs();
+        const [sdtout, sdterr] = await runShell('git version');
+        if (!/version/.test(sdtout)) {
+            throw new Error('please install git on your pc');
+        }
+        const url = conf.remote;
+        const version = conf.tag || conf.branch;
+        const clonePath = path.resolve(git_source, '.source', conf.name, version);
+        const tmpPath = path.resolve(git_source, '.tmp', conf.name, version);
+        let tarName = `${conf.name}-${version}.tar.gz`;
+        const _init = async () => {
+            await runShell(`rm -rf ${clonePath} && git clone -b ${version} ${url} ${clonePath} && cd ${clonePath} && rm -rf .git && echo 'success' > .kge_success`);
+            await runShell(conf.bash, {cwd: clonePath});
+            await runShell(`cd ${clonePath} && tar -zcvf ${tarName} ./`)
+        }
+        if (args.init) {
+            await _init();
+        }
+        if (!fs.existsSync(path.resolve(clonePath, '.kge_success'))) {
+            await _init();
+        }
 
+        const _copy = async () => {
+            await runShell(`mkdir -p ${tmpPath} && cd ${tmpPath} && tar -zxvf ${path.resolve(clonePath, tarName)}`)
+        }
+        if (args.copy) {
+            await _copy()
+        }
+        if (!fs.existsSync(path.resolve(tmpPath, '.kge_success'))) {
+            await _copy()
+        }
+        return conf
     }
 
-    gulp() {
+    async gulp(conf) {
+        let remove_path = [];
+        let replace_path = [];
+        let add_path = [];
+        let version = conf.tag || conf.branch;
+        let tmpPath = path.resolve(git_source, '.tmp', conf.name, version);
+        let destPath = path.resolve(git_source, '.dest', conf.name, version);
+        conf['__dest'] = destPath;
+        _.each(conf.replace, (file) => {
+            file.source = !file.source ? file.source : getAbsPath(file.source, path.dirname(conf.__filename));
+            file.target = !file.target ? file.target : getAbsPath(file.target, tmpPath);
 
+            if (!fs.existsSync(file.source) && fs.existsSync(file.target)) {
+                remove_path.push(file);
+            }
+            if (fs.existsSync(file.source) && fs.existsSync(file.target)) {
+                replace_path.push(file);
+            }
+            if (fs.existsSync(file.source) && !fs.existsSync(file.target)) {
+                add_path.push(file);
+            }
+        })
+        gulp.task('add', async () => {
+            console.log(`${chalk.green(`run add task...`)}`)
+            const cmd = _.map(add_path, (file) => {
+                return `cp -rf ${file.source} ${file.target}`
+            }).join('&&')
+            return await runShell(cmd)
+        })
+        gulp.task('remove', async () => {
+            console.log(`${chalk.green(`run remove task...`)}`)
+            const cmd = _.map(add_path, (file) => {
+                return `rm -rf ${file.target}`
+            }).join('&&')
+            return await runShell(cmd)
+        })
+        gulp.task('replace', async () => {
+            console.log(`${chalk.green(`run replace task...`)}`)
+            const cmd = _.map(add_path, (file) => {
+                return `cp -rf ${file.source} ${file.target}`
+            }).join('&&')
+            return await runShell(cmd)
+        })
+        gulp.task('pipe', async () => {
+            console.log(`${chalk.green(`run pipe task...`)}`);
+            return gulp.src([tmpPath + '/**/*'])
+                .pipe(gulpCached(`${conf.name}:${version}`))
+                .pipe(gulp.dest('' + destPath));
+        })
+        return [gulp.task('run', (done) => {
+            return gulpSequence(['add', 'remove', 'replace'], 'pipe', done)
+        }), conf]
     }
 
-    devServer() {
-
+    async devServer(task, conf) {
+        if (!conf.__dest) return
+        gulpSequence('run')(async () => {
+            await runShell(conf.start, {cwd: conf.__dest});
+            console.log(`${chalk.green.underline(`success : ${conf.__dest}`)}`);
+        })
+        gulp.watch([], (event) => {
+            console.log(`${chalk.yellow(`File ${event.path} was ${event.type} , running tasks...`)}`);
+            gulpSequence('run')(async () => {
+                await runShell(conf.restart, {cwd: conf.__dest});
+                if (conf.restart) console.log(`${chalk.green.underline(`restart : ${conf.__dest}`)}`);
+            })
+        })
     }
 
-    dev() {
-
+    async dev(name) {
+        await tasks([
+            async () => {
+                return await this.configForName(name)
+            },
+            async (conf) => {
+                return await this.init(conf)
+            },
+            async (conf) => {
+                return await this.gulp(conf)
+            },
+            async ([task, conf]) => {
+                return await this.devServer(task, conf)
+            }
+        ])
     }
 
-    build() {
-
+    async build(name) {
+        await tasks([
+            async () => {
+                return await this.configForName(name)
+            },
+            async (conf) => {
+                return await this.init(conf)
+            },
+            async (conf) => {
+                return await this.gulp(conf)
+            },
+            async ([task, conf]) => {
+                return gulpSequence('run')(() => {
+                    console.log(`${chalk.green.underline(`success : ${conf.__dest}`)}`);
+                })
+            }
+        ])
     }
 
     async run() {
@@ -91,4 +211,5 @@ class Kgr {
         }
     }
 }
+
 export default Kgr

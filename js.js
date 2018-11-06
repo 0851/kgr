@@ -88,7 +88,9 @@ var _parseConfig = require('./libs/parse-config');
 
 var _core = require('./libs/core');
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {default: obj};
+}
 
 var log = (0, _debug2.default)(_package2.default.name);
 var git_source = _path2.default.resolve(__dirname, '../.__source');
@@ -152,7 +154,7 @@ var Kgr = function () {
     }, {
         key: 'init',
         value: function () {
-            var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(conf) {
+            var _ref = (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee(conf) {
                 var args, _ref2, _ref3, sdtout, sdterr, url, version, clonePath, tmpPath, tarname;
 
                 return _regenerator2.default.wrap(function _callee$(_context) {
@@ -220,7 +222,7 @@ var Kgr = function () {
 
                                 _context.prev = 26;
                                 _context.next = 29;
-                                return (0, _core.runShell)(conf.bash, { cwd: tmpPath });
+                                return (0, _core.runShell)(conf.bash, {cwd: tmpPath});
 
                             case 29:
                                 _context.next = 34;
@@ -297,7 +299,7 @@ var Kgr = function () {
             //         .pipe(cached(`${conf.name}:${version}:tmp`))
             //         .pipe(gulp.dest(`${path.resolve(tmpPath, version)}`))
             // })
-            _gulp3.default.task('add', (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
+            _gulp3.default.task('add', (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee2() {
                 var cmd;
                 return _regenerator2.default.wrap(function _callee2$(_context2) {
                     while (1) {
@@ -326,7 +328,7 @@ var Kgr = function () {
                     }
                 }, _callee2, _this);
             })));
-            _gulp3.default.task('remove', (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
+            _gulp3.default.task('remove', (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee3() {
                 var cmd;
                 return _regenerator2.default.wrap(function _callee3$(_context3) {
                     while (1) {
@@ -365,7 +367,7 @@ var Kgr = function () {
                     }
                 }, _callee3, _this, [[3, 8]]);
             })));
-            _gulp3.default.task('replace', (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4() {
+            _gulp3.default.task('replace', (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee4() {
                 var cmd;
                 return _regenerator2.default.wrap(function _callee4$(_context4) {
                     while (1) {
@@ -411,21 +413,21 @@ var Kgr = function () {
     }, {
         key: 'devServer',
         value: function () {
-            var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(task, conf) {
+            var _ref7 = (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee7(task, conf) {
                 var _this2 = this;
 
                 return _regenerator2.default.wrap(function _callee7$(_context7) {
                     while (1) {
                         switch (_context7.prev = _context7.next) {
                             case 0:
-                                (0, _gulpSequence2.default)('run')((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5() {
+                                (0, _gulpSequence2.default)('run')((0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee5() {
                                     return _regenerator2.default.wrap(function _callee5$(_context5) {
                                         while (1) {
                                             switch (_context5.prev = _context5.next) {
                                                 case 0:
                                                     _context5.prev = 0;
                                                     _context5.next = 3;
-                                                    return (0, _core.runShell)(conf.start, { cwd: conf.__dest });
+                                                    return (0, _core.runShell)(conf.start, {cwd: conf.__dest});
 
                                                 case 3:
                                                     if (conf.start) console.log('run start ' + conf.start + ' on ' + conf.__dest);
@@ -448,14 +450,14 @@ var Kgr = function () {
                                     var _this3 = this;
 
                                     console.log('' + _chalk2.default.yellow('File ' + event.path + ' was ' + event.type + ' , running tasks...'));
-                                    (0, _gulpSequence2.default)('run')((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6() {
+                                    (0, _gulpSequence2.default)('run')((0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee6() {
                                         return _regenerator2.default.wrap(function _callee6$(_context6) {
                                             while (1) {
                                                 switch (_context6.prev = _context6.next) {
                                                     case 0:
                                                         _context6.prev = 0;
                                                         _context6.next = 3;
-                                                        return (0, _core.runShell)(conf.restart, { cwd: conf.__dest });
+                                                        return (0, _core.runShell)(conf.restart, {cwd: conf.__dest});
 
                                                     case 3:
                                                         if (conf.restart) console.log('run start ' + conf.restart + ' on ' + conf.__dest);
@@ -493,7 +495,7 @@ var Kgr = function () {
     }, {
         key: 'dev',
         value: function () {
-            var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11(name) {
+            var _ref10 = (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee11(name) {
                 var _this4 = this;
 
                 return _regenerator2.default.wrap(function _callee11$(_context11) {
@@ -505,7 +507,7 @@ var Kgr = function () {
                                 return (0, _core.tasks)([function () {
                                     return _this4.configForName(name);
                                 }, function () {
-                                    var _ref11 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(conf) {
+                                    var _ref11 = (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee8(conf) {
                                         return _regenerator2.default.wrap(function _callee8$(_context8) {
                                             while (1) {
                                                 switch (_context8.prev = _context8.next) {
@@ -528,7 +530,7 @@ var Kgr = function () {
                                         return _ref11.apply(this, arguments);
                                     };
                                 }(), function () {
-                                    var _ref12 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(conf) {
+                                    var _ref12 = (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee9(conf) {
                                         return _regenerator2.default.wrap(function _callee9$(_context9) {
                                             while (1) {
                                                 switch (_context9.prev = _context9.next) {
@@ -551,7 +553,7 @@ var Kgr = function () {
                                         return _ref12.apply(this, arguments);
                                     };
                                 }(), function () {
-                                    var _ref13 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10(_ref14) {
+                                    var _ref13 = (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee10(_ref14) {
                                         var _ref15 = (0, _slicedToArray3.default)(_ref14, 2),
                                             task = _ref15[0],
                                             conf = _ref15[1];
@@ -606,7 +608,7 @@ var Kgr = function () {
     }, {
         key: 'build',
         value: function () {
-            var _ref16 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee16(name) {
+            var _ref16 = (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee16(name) {
                 var _this5 = this;
 
                 return _regenerator2.default.wrap(function _callee16$(_context16) {
@@ -618,7 +620,7 @@ var Kgr = function () {
                                 return (0, _core.tasks)([function () {
                                     return _this5.configForName(name);
                                 }, function () {
-                                    var _ref17 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12(conf) {
+                                    var _ref17 = (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee12(conf) {
                                         return _regenerator2.default.wrap(function _callee12$(_context12) {
                                             while (1) {
                                                 switch (_context12.prev = _context12.next) {
@@ -641,7 +643,7 @@ var Kgr = function () {
                                         return _ref17.apply(this, arguments);
                                     };
                                 }(), function () {
-                                    var _ref18 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13(conf) {
+                                    var _ref18 = (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee13(conf) {
                                         return _regenerator2.default.wrap(function _callee13$(_context13) {
                                             while (1) {
                                                 switch (_context13.prev = _context13.next) {
@@ -664,7 +666,7 @@ var Kgr = function () {
                                         return _ref18.apply(this, arguments);
                                     };
                                 }(), function () {
-                                    var _ref19 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee15(_ref20) {
+                                    var _ref19 = (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee15(_ref20) {
                                         var _ref21 = (0, _slicedToArray3.default)(_ref20, 2),
                                             task = _ref21[0],
                                             conf = _ref21[1];
@@ -673,7 +675,7 @@ var Kgr = function () {
                                             while (1) {
                                                 switch (_context15.prev = _context15.next) {
                                                     case 0:
-                                                        _gulp3.default.start((0, _gulpSequence2.default)('run', (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee14() {
+                                                        _gulp3.default.start((0, _gulpSequence2.default)('run', (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee14() {
                                                             return _regenerator2.default.wrap(function _callee14$(_context14) {
                                                                 while (1) {
                                                                     switch (_context14.prev = _context14.next) {
@@ -728,7 +730,7 @@ var Kgr = function () {
     }, {
         key: 'run',
         value: function () {
-            var _ref23 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee17() {
+            var _ref23 = (0, _asyncToGenerator3.default)(/*#__PURE__*/_regenerator2.default.mark(function _callee17() {
                 var args, name, mode;
                 return _regenerator2.default.wrap(function _callee17$(_context17) {
                     while (1) {
