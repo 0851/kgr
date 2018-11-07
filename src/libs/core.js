@@ -2,11 +2,44 @@ import path from "path";
 import debug from "debug";
 import pkg from "../../package.json";
 import _ from 'lodash'
+import fs from 'fs'
 import {spawn, exec} from "child_process";
+import detect from 'detect-import-require';
 
 const log = debug(`${pkg.name}:core`);
 
 const noop = () => {
+}
+
+const findDependen = async (files) => {
+    if (!_.isArray(files)) {
+        files = [files]
+    }
+    const result = [];
+    while (files.length) {
+        let file = files.shift();
+        if (path.extname(file) === '') {
+            files.push(`${path.resolve(file, 'index.js')}`);
+            files.push(`${file}.js`);
+            continue;
+        }
+        if (!fs.existsSync(file)) {
+            continue;
+        }
+        const stat = fs.statSync(file);
+
+        if (!stat.isFile() || !/\.js$/.test(file)) {
+            continue;
+        }
+        const content = fs.readFileSync(file, 'utf8')
+
+        result.push(file);
+        const dep = _.map(detect(content), (f) => {
+            return getAbsPath(f, path.dirname(file))
+        });
+        files = files.concat(dep)
+    }
+    return result;
 }
 
 function getAbsPath(output, base) {
@@ -73,5 +106,6 @@ async function tasks(processes) {
 export {
     getAbsPath,
     runShell,
-    tasks
+    tasks,
+    findDependen
 }

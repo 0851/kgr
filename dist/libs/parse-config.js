@@ -76,7 +76,8 @@ function readConfig(config) {
         if (!/js(on)?$/.test(file)) {
             return res;
         }
-
+        //删除缓存
+        delete require.cache[require.resolve(file)];
         var obj = require(file);
         log("obj ---> " + obj + "," + (typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj)) + "," + (0, _stringify2.default)(obj));
         if ((0, _isFunction3.default)(obj)) {

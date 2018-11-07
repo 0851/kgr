@@ -8,11 +8,14 @@ import gulp from 'gulp';
 import gulpSequence from 'gulp-sequence';
 import gulpCached from 'gulp-cached';
 import {readConfig} from './libs/parse-config';
-import {getAbsPath, tasks, runShell} from './libs/core';
+import {getAbsPath, tasks, runShell, findDependen} from './libs/core';
 import pkg from '../package.json'
 
 const log = debug(pkg.name);
-const git_source = path.resolve(__dirname, '../.__source');
+
+const dir = {
+    source: path.resolve(__dirname, '../.__source'),
+}
 
 class Kgr {
     constructor(args) {
@@ -29,24 +32,14 @@ class Kgr {
         return this.args
     }
 
-    getOutput() {
-        let output = this.getArgs().output;
-        output = getAbsPath(output || 'dist');
-        log('output ---> ' + output);
-        return output;
-    }
-
     setConfig() {
         const config = readConfig(this.getArgs().config)
         this.config = config;
-    }
-
-    getConfig() {
-        return this.config;
+        return config;
     }
 
     configForName(name) {
-        const config = this.getConfig();
+        const config = this.setConfig();
         const matched = _.find(config, function (conf) {
             return conf.name === name;
         });
@@ -56,7 +49,26 @@ class Kgr {
         return matched;
     }
 
-    async init(conf) {
+    sourcePath(conf) {
+        const version = conf.tag || conf.branch;
+        const source = path.resolve(dir.source, '.source', conf.name, version);
+        return source
+    }
+
+    tmpPath(conf) {
+        const version = conf.tag || conf.branch;
+        const tmp = path.resolve(dir.source, '.tmp', conf.name, version);
+        return tmp
+    }
+
+    destPath(conf) {
+        let version = conf.tag || conf.branch;
+        let dest = path.resolve(dir.source, '.dest', conf.name, version);
+        return dest
+    }
+
+    async init(name) {
+        const conf = await this.configForName(name);
         const args = this.getArgs();
         const [sdtout, sdterr] = await runShell('git version');
         if (!/version/.test(sdtout)) {
@@ -64,81 +76,81 @@ class Kgr {
         }
         const url = conf.remote;
         const version = conf.tag || conf.branch;
-        const clonePath = path.resolve(git_source, '.source', conf.name, version);
-        const tmpPath = path.resolve(git_source, '.tmp', conf.name, version);
+        const source = this.sourcePath(conf);
+        const tmp = this.tmpPath(conf);
         let tarName = `${conf.name}-${version}.tar.gz`;
         const _init = async () => {
-            await runShell(`rm -rf ${clonePath} && git clone -b ${version} ${url} ${clonePath} && cd ${clonePath} && rm -rf .git && echo 'success' > .kge_success`);
-            await runShell(conf.bash, {cwd: clonePath});
-            await runShell(`cd ${clonePath} && tar -zcf ${tarName} ./`)
+            await runShell(`rm -rf ${source} && git clone -b ${version} ${url} ${source} && cd ${source} && rm -rf .git && echo 'success' > .kge_success`);
+            await runShell(conf.bash, {cwd: source});
+            await runShell(`cd ${source} && tar -zcf ${tarName} ./`)
         };
         if (args.init) {
             await _init();
         }
-        if (!fs.existsSync(path.resolve(clonePath, '.kge_success'))) {
+        if (!fs.existsSync(path.resolve(source, '.kge_success'))) {
             await _init();
         }
 
         const _copy = async () => {
-            await runShell(`mkdir -p ${tmpPath} && cd ${tmpPath} && tar -zxf ${path.resolve(clonePath, tarName)}`)
+            await runShell(`mkdir -p ${tmp} && cd ${tmp} && tar -zxf ${path.resolve(source, tarName)}`)
         };
         if (args.copy) {
             await _copy()
         }
-        if (!fs.existsSync(path.resolve(tmpPath, '.kge_success'))) {
+        if (!fs.existsSync(path.resolve(tmp, '.kge_success'))) {
             await _copy()
         }
         return conf
     }
 
-    async gulp(conf) {
-        let remove_path = [];
-        let replace_path = [];
-        let add_path = [];
+    async gulp(name) {
+        const conf = await this.configForName(name);
+        let removePath = [];
+        let replacePath = [];
+        let addPath = [];
         let version = conf.tag || conf.branch;
-        let tmpPath = path.resolve(git_source, '.tmp', conf.name, version);
-        let destPath = path.resolve(git_source, '.dest', conf.name, version);
-        conf['__dest'] = destPath;
+        let dest = this.destPath(conf);
+        let tmp = this.tmpPath(conf);
         _.each(conf.replace, (file) => {
             file.source = !file.source ? file.source : getAbsPath(file.source, path.dirname(conf.__filename));
-            file.target = !file.target ? file.target : getAbsPath(file.target, tmpPath);
+            file.target = !file.target ? file.target : getAbsPath(file.target, tmp);
 
             if (!fs.existsSync(file.source) && fs.existsSync(file.target)) {
-                remove_path.push(file);
+                removePath.push(file);
             }
             if (fs.existsSync(file.source) && fs.existsSync(file.target)) {
-                replace_path.push(file);
+                replacePath.push(file);
             }
             if (fs.existsSync(file.source) && !fs.existsSync(file.target)) {
-                add_path.push(file);
+                addPath.push(file);
             }
         })
         gulp.task('add', async () => {
             console.log(`${chalk.green(`run add task...`)}`)
-            const cmd = _.map(add_path, (file) => {
+            const cmd = _.map(addPath, (file) => {
                 return `cp -rf ${file.source} ${file.target}`
             }).join('&&')
             return await runShell(cmd)
         })
         gulp.task('remove', async () => {
             console.log(`${chalk.green(`run remove task...`)}`)
-            const cmd = _.map(add_path, (file) => {
+            const cmd = _.map(addPath, (file) => {
                 return `rm -rf ${file.target}`
             }).join('&&')
             return await runShell(cmd)
         })
         gulp.task('replace', async () => {
             console.log(`${chalk.green(`run replace task...`)}`)
-            const cmd = _.map(add_path, (file) => {
+            const cmd = _.map(addPath, (file) => {
                 return `cp -rf ${file.source} ${file.target}`
             }).join('&&')
             return await runShell(cmd)
         })
         gulp.task('pipe', (done) => {
             console.log(`${chalk.green(`run pipe task...`)}`);
-            const stream = gulp.src([tmpPath + '/**/*'])
+            const stream = gulp.src([tmp + '/**/*'])
                 .pipe(gulpCached(`${conf.name}:${version}`))
-                .pipe(gulp.dest(`${destPath}`))
+                .pipe(gulp.dest(`${dest}`))
             stream.on('end', () => {
                 done()
             })
@@ -146,29 +158,34 @@ class Kgr {
                 done(err);
             });
         })
-        return [gulp.task('run', (done) => {
+        return gulp.task('run', (done) => {
             return gulpSequence(['add', 'remove', 'replace'], 'pipe', done)
-        }), conf]
+        })
     }
 
-    async devServer(task, conf) {
-        if (!conf.__dest) return
+    async devServer(task, name) {
+        const conf = await this.configForName(name);
+        let dest = this.destPath(conf);
+        if (!fs.existsSync(dest)) return
         gulpSequence('run')(async () => {
-            await runShell(conf.start, {cwd: conf.__dest});
-            console.log(`${chalk.green.underline(`success : ${conf.__dest}`)}`);
+            await runShell(conf.start, {cwd: dest});
+            console.log(`${chalk.green.underline(`success : ${dest}`)}`);
         })
-        const files = [conf.__filename]
+        const files = await findDependen(conf.__filename);
         _.each(conf.replace, (file) => {
             file.source = !file.source ? file.source : getAbsPath(file.source, path.dirname(conf.__filename));
             if (fs.existsSync(file.source)) {
                 files.push(file.source)
             }
         });
-        gulp.watch(files, (event) => {
+        gulp.watch(files, async (event) => {
             console.log(`${chalk.yellow(`File ${event.path} was ${event.type} , running tasks...`)}`);
+            await this.gulp(name);
             gulpSequence('run')(async () => {
-                await runShell(conf.restart, {cwd: conf.__dest});
-                if (conf.restart) console.log(`${chalk.green.underline(`restart : ${conf.__dest}`)}`);
+                const conf = await this.configForName(name);
+                let dest = this.destPath(conf);
+                await runShell(conf.restart, {cwd: dest});
+                if (conf.restart) console.log(`${chalk.green.underline(`restart : ${dest}`)}`);
             })
         })
     }
@@ -176,16 +193,13 @@ class Kgr {
     async dev(name) {
         await tasks([
             async () => {
-                return await this.configForName(name)
+                return await this.init(name)
             },
-            async (conf) => {
-                return await this.init(conf)
+            async () => {
+                return await this.gulp(name)
             },
-            async (conf) => {
-                return await this.gulp(conf)
-            },
-            async ([task, conf]) => {
-                return await this.devServer(task, conf)
+            async (task) => {
+                return await this.devServer(task, name)
             }
         ])
     }
@@ -193,17 +207,17 @@ class Kgr {
     async build(name) {
         await tasks([
             async () => {
-                return await this.configForName(name)
+                return await this.init(name)
             },
-            async (conf) => {
-                return await this.init(conf)
+            async () => {
+                return await this.gulp(name)
             },
-            async (conf) => {
-                return await this.gulp(conf)
-            },
-            async ([task, conf]) => {
+            async (task) => {
+                const conf = await this.configForName(name);
                 return gulpSequence('run')(() => {
-                    console.log(`${chalk.green.underline(`success : ${conf.__dest}`)}`);
+                    let dest = this.destPath(conf);
+                    if (!fs.existsSync(dest)) return
+                    console.log(`${chalk.green.underline(`success : ${dest}`)}`);
                 })
             }
         ])
@@ -211,7 +225,7 @@ class Kgr {
 
     async run() {
         let args = this.getArgs();
-        let name = args.name || this.getConfig()[0].name;
+        let name = args.name || this.setConfig()[0].name;
         let mode = args.mode || 'dev';
         if (!name) {
             throw new Error('请设置一个启动项目的名称');

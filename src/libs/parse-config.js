@@ -25,7 +25,8 @@ function readConfig(config) {
         if (!/js(on)?$/.test(file)) {
             return res;
         }
-
+        //删除缓存
+        delete require.cache[require.resolve(file)];
         let obj = require(file);
         log(`obj ---> ${obj},${typeof obj},${JSON.stringify(obj)}`);
         if (_.isFunction(obj)) {

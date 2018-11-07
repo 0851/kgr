@@ -33,6 +33,7 @@
     "chalk": "latest",
     "commander": "^2.19.0",
     "debug": "^4.1.0",
+    "detect-import-require": "^2.0.0",
     "globby": "^8.0.1",
     "gulp": "^3.9.1",
     "gulp-cached": "^1.1.1",

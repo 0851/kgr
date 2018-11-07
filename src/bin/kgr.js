@@ -11,7 +11,9 @@ commander
     })
     .option('-o, --output [output]', 'output path', 'dist')
     .option('-m, --mode [mode]', 'run project mode , default dev', 'dev')
-    .option('-n, --name [name]', 'run project name', '')
+    .option('-n, --name [name]', 'run project name , default find first name in config file', '')
+    .option('--init [init]', 'init project', '')
+    .option('--copy [copy]', 'copy project', '')
     .parse(process.argv)
 
 export default new Kgr(commander).run();
