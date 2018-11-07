@@ -96,6 +96,10 @@ var _gulpCached = require('gulp-cached');
 
 var _gulpCached2 = _interopRequireDefault(_gulpCached);
 
+var _gulpChanged = require('gulp-changed');
+
+var _gulpChanged2 = _interopRequireDefault(_gulpChanged);
+
 var _parseConfig = require('./libs/parse-config');
 
 var _core = require('./libs/core');
@@ -227,7 +231,7 @@ var Kgr = function () {
 
                                                     case 4:
                                                         _context.next = 6;
-                                                        return (0, _core.runShell)('cd ' + source + ' && tar -zcf ' + tarName + ' ./');
+                                                        return (0, _core.runShell)('cd ' + source + ' && b=' + tarName + '; tar --exclude=$b -zcf $b .');
 
                                                     case 6:
                                                     case 'end':
@@ -430,7 +434,7 @@ var Kgr = function () {
                                     if (!(0, _isArray3.default)(pipes)) {
                                         pipes = [pipes];
                                     }
-                                    console.log((0, _stringify2.default)(pipes));
+
                                     stream = (0, _reduce3.default)(pipes, function (stream, pipe) {
                                         if (!(0, _isArray3.default)(pipe)) {
                                             return stream;
@@ -439,17 +443,14 @@ var Kgr = function () {
                                         var replacement = pipe[1];
                                         var options = pipe[2];
                                         if (((0, _isString3.default)(reg) || (0, _isRegExp3.default)(reg)) && ((0, _isFunction3.default)(replacement) || (0, _isString3.default)(replacement))) {
-                                            console.log(reg, replacement, '======');
                                             stream = stream.pipe((0, _gulpReplace2.default)(reg, replacement, options));
                                         }
                                         return stream;
                                     }, stream);
-                                    stream.pipe((0, _gulpCached2.default)(conf.name + ':' + version));
-                                    stream.pipe(_gulp3.default.dest('' + dest));
-                                    stream.on('end', function () {
+
+                                    stream.pipe((0, _gulpChanged2.default)('' + dest)).pipe(_gulp3.default.dest('' + dest)).on('end', function () {
                                         done();
-                                    });
-                                    stream.on('error', function (err) {
+                                    }).on('error', function (err) {
                                         done(err);
                                     });
                                 });
@@ -477,7 +478,7 @@ var Kgr = function () {
             var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11(task, name) {
                 var _this3 = this;
 
-                var conf, dest, files;
+                var conf, files;
                 return _regenerator2.default.wrap(function _callee11$(_context11) {
                     while (1) {
                         switch (_context11.prev = _context11.next) {
@@ -487,38 +488,45 @@ var Kgr = function () {
 
                             case 2:
                                 conf = _context11.sent;
-                                dest = this.destPath(conf);
 
-                                if (_fs2.default.existsSync(dest)) {
-                                    _context11.next = 6;
-                                    break;
-                                }
-
-                                return _context11.abrupt('return');
-
-                            case 6:
                                 (0, _gulpSequence2.default)('run')((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8() {
+                                    var conf, dest;
                                     return _regenerator2.default.wrap(function _callee8$(_context8) {
                                         while (1) {
                                             switch (_context8.prev = _context8.next) {
                                                 case 0:
                                                     _context8.next = 2;
-                                                    return (0, _core.runShell)(conf.start, { cwd: dest });
+                                                    return _this3.configForName(name);
 
                                                 case 2:
+                                                    conf = _context8.sent;
+                                                    dest = _this3.destPath(conf);
+
+                                                    if (_fs2.default.existsSync(dest)) {
+                                                        _context8.next = 6;
+                                                        break;
+                                                    }
+
+                                                    throw new Error('can fount dest path ' + dest);
+
+                                                case 6:
+                                                    _context8.next = 8;
+                                                    return (0, _core.runShell)(conf.start, { cwd: dest });
+
+                                                case 8:
                                                     console.log('' + _chalk2.default.green.underline('success : ' + dest));
 
-                                                case 3:
+                                                case 9:
                                                 case 'end':
                                                     return _context8.stop();
                                             }
                                         }
                                     }, _callee8, _this3);
                                 })));
-                                _context11.next = 9;
+                                _context11.next = 6;
                                 return (0, _core.findDependen)(conf.__filename);
 
-                            case 9:
+                            case 6:
                                 files = _context11.sent;
 
                                 (0, _each3.default)(conf.replace, function (file) {
@@ -550,13 +558,22 @@ var Kgr = function () {
                                                                         case 2:
                                                                             conf = _context9.sent;
                                                                             dest = _this3.destPath(conf);
-                                                                            _context9.next = 6;
-                                                                            return (0, _core.runShell)(conf.restart, { cwd: dest });
+
+                                                                            if (_fs2.default.existsSync(dest)) {
+                                                                                _context9.next = 6;
+                                                                                break;
+                                                                            }
+
+                                                                            throw new Error('can fount dest path ' + dest);
 
                                                                         case 6:
+                                                                            _context9.next = 8;
+                                                                            return (0, _core.runShell)(conf.restart, { cwd: dest });
+
+                                                                        case 8:
                                                                             if (conf.restart) console.log('' + _chalk2.default.green.underline('restart : ' + dest));
 
-                                                                        case 7:
+                                                                        case 9:
                                                                         case 'end':
                                                                             return _context9.stop();
                                                                     }
@@ -577,7 +594,7 @@ var Kgr = function () {
                                     };
                                 }());
 
-                            case 12:
+                            case 9:
                             case 'end':
                                 return _context11.stop();
                         }

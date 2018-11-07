@@ -8,6 +8,7 @@ import gulp from 'gulp';
 import gulpSequence from 'gulp-sequence';
 import gulpReplace from 'gulp-replace';
 import gulpCached from 'gulp-cached';
+import gulpChanged from 'gulp-changed';
 import {readConfig} from './libs/parse-config';
 import {getAbsPath, tasks, runShell, findDependen} from './libs/core';
 import pkg from '../package.json'
@@ -83,7 +84,7 @@ class Kgr {
         const _init = async () => {
             await runShell(`rm -rf ${source} && git clone -b ${version} ${url} ${source} && cd ${source} && rm -rf .git && echo 'success' > .kge_success`);
             await runShell(conf.bash, {cwd: source});
-            await runShell(`cd ${source} && tar -zcf ${tarName} ./`)
+            await runShell(`cd ${source} && b=${tarName}; tar --exclude=$b -zcf $b .`)
         };
         if (args.init) {
             await _init();
@@ -150,12 +151,12 @@ class Kgr {
         gulp.task('pipe', (done) => {
             console.log(`${chalk.green(`run pipe task...`)}`);
             let stream = gulp.src([tmp + '/**/*'])
-            
+
             let pipes = conf.pipe;
             if (!_.isArray(pipes)) {
                 pipes = [pipes];
             }
-            console.log(JSON.stringify(pipes))
+
             stream = _.reduce(pipes, (stream, pipe) => {
                 if (!_.isArray(pipe)) {
                     return stream;
@@ -165,19 +166,19 @@ class Kgr {
                 const options = pipe[2]
                 if ((_.isString(reg) || _.isRegExp(reg))
                     && (_.isFunction(replacement) || _.isString(replacement))) {
-                    console.log(reg, replacement, '======')
                     stream = stream.pipe(gulpReplace(reg, replacement, options))
                 }
                 return stream;
             }, stream);
-            stream.pipe(gulpCached(`${conf.name}:${version}`))
-            stream.pipe(gulp.dest(`${dest}`))
-            stream.on('end', () => {
-                done()
-            })
-            stream.on('error', function (err) {
-                done(err);
-            });
+
+            stream.pipe(gulpChanged(`${dest}`))
+                .pipe(gulp.dest(`${dest}`))
+                .on('end', () => {
+                    done()
+                })
+                .on('error', function (err) {
+                    done(err);
+                });
         })
         return gulp.task('run', (done) => {
             return gulpSequence(['add', 'remove', 'replace'], 'pipe', done)
@@ -186,9 +187,12 @@ class Kgr {
 
     async devServer(task, name) {
         const conf = await this.configForName(name);
-        let dest = this.destPath(conf);
-        if (!fs.existsSync(dest)) return
         gulpSequence('run')(async () => {
+            const conf = await this.configForName(name);
+            let dest = this.destPath(conf);
+            if (!fs.existsSync(dest)) {
+                throw new Error(`can fount dest path ${dest}`)
+            }
             await runShell(conf.start, {cwd: dest});
             console.log(`${chalk.green.underline(`success : ${dest}`)}`);
         })
@@ -205,6 +209,9 @@ class Kgr {
             gulpSequence('run')(async () => {
                 const conf = await this.configForName(name);
                 let dest = this.destPath(conf);
+                if (!fs.existsSync(dest)) {
+                    throw new Error(`can fount dest path ${dest}`)
+                }
                 await runShell(conf.restart, {cwd: dest});
                 if (conf.restart) console.log(`${chalk.green.underline(`restart : ${dest}`)}`);
             })

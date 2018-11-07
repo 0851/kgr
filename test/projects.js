@@ -19,7 +19,7 @@ module.exports = function () {
             //启动命令 ,mode dev时执行
             start: 'ls',
             //文件改变后命令 , 空代表改变文件后不触发操作 , mode dev时执行
-            restart: 'ls',
+            restart: 'ls -l',
             //git 地址
             remote: 'http://newgit.op.ksyun.com/ksc-cns-fe/public-business-components.git',
             //分支
