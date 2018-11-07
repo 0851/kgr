@@ -28,6 +28,26 @@ var _createClass2 = require('babel-runtime/helpers/createClass');
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
+var _isFunction2 = require('lodash/isFunction');
+
+var _isFunction3 = _interopRequireDefault(_isFunction2);
+
+var _isRegExp2 = require('lodash/isRegExp');
+
+var _isRegExp3 = _interopRequireDefault(_isRegExp2);
+
+var _isString2 = require('lodash/isString');
+
+var _isString3 = _interopRequireDefault(_isString2);
+
+var _reduce2 = require('lodash/reduce');
+
+var _reduce3 = _interopRequireDefault(_reduce2);
+
+var _isArray2 = require('lodash/isArray');
+
+var _isArray3 = _interopRequireDefault(_isArray2);
+
 var _map2 = require('lodash/map');
 
 var _map3 = _interopRequireDefault(_map2);
@@ -67,6 +87,10 @@ var _gulp3 = _interopRequireDefault(_gulp2);
 var _gulpSequence = require('gulp-sequence');
 
 var _gulpSequence2 = _interopRequireDefault(_gulpSequence);
+
+var _gulpReplace = require('gulp-replace');
+
+var _gulpReplace2 = _interopRequireDefault(_gulpReplace);
 
 var _gulpCached = require('gulp-cached');
 
@@ -400,7 +424,28 @@ var Kgr = function () {
                                 })));
                                 _gulp3.default.task('pipe', function (done) {
                                     console.log('' + _chalk2.default.green('run pipe task...'));
-                                    var stream = _gulp3.default.src([tmp + '/**/*']).pipe((0, _gulpCached2.default)(conf.name + ':' + version)).pipe(_gulp3.default.dest('' + dest));
+                                    var stream = _gulp3.default.src([tmp + '/**/*']);
+
+                                    var pipes = conf.pipe;
+                                    if (!(0, _isArray3.default)(pipes)) {
+                                        pipes = [pipes];
+                                    }
+                                    console.log((0, _stringify2.default)(pipes));
+                                    stream = (0, _reduce3.default)(pipes, function (stream, pipe) {
+                                        if (!(0, _isArray3.default)(pipe)) {
+                                            return stream;
+                                        }
+                                        var reg = pipe[0];
+                                        var replacement = pipe[1];
+                                        var options = pipe[2];
+                                        if (((0, _isString3.default)(reg) || (0, _isRegExp3.default)(reg)) && ((0, _isFunction3.default)(replacement) || (0, _isString3.default)(replacement))) {
+                                            console.log(reg, replacement, '======');
+                                            stream = stream.pipe((0, _gulpReplace2.default)(reg, replacement, options));
+                                        }
+                                        return stream;
+                                    }, stream);
+                                    stream.pipe((0, _gulpCached2.default)(conf.name + ':' + version));
+                                    stream.pipe(_gulp3.default.dest('' + dest));
                                     stream.on('end', function () {
                                         done();
                                     });

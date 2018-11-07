@@ -37,6 +37,7 @@
     "globby": "^8.0.1",
     "gulp": "^3.9.1",
     "gulp-cached": "^1.1.1",
+    "gulp-replace": "^1.0.0",
     "gulp-sequence": "^1.0.0",
     "lodash": "^4.17.10",
     "mkdirp": "^0.5.1",

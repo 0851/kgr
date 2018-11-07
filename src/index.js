@@ -6,6 +6,7 @@ import mkdirp from 'mkdirp';
 import chalk from 'chalk';
 import gulp from 'gulp';
 import gulpSequence from 'gulp-sequence';
+import gulpReplace from 'gulp-replace';
 import gulpCached from 'gulp-cached';
 import {readConfig} from './libs/parse-config';
 import {getAbsPath, tasks, runShell, findDependen} from './libs/core';
@@ -148,9 +149,29 @@ class Kgr {
         })
         gulp.task('pipe', (done) => {
             console.log(`${chalk.green(`run pipe task...`)}`);
-            const stream = gulp.src([tmp + '/**/*'])
-                .pipe(gulpCached(`${conf.name}:${version}`))
-                .pipe(gulp.dest(`${dest}`))
+            let stream = gulp.src([tmp + '/**/*'])
+            
+            let pipes = conf.pipe;
+            if (!_.isArray(pipes)) {
+                pipes = [pipes];
+            }
+            console.log(JSON.stringify(pipes))
+            stream = _.reduce(pipes, (stream, pipe) => {
+                if (!_.isArray(pipe)) {
+                    return stream;
+                }
+                const reg = pipe[0]
+                const replacement = pipe[1]
+                const options = pipe[2]
+                if ((_.isString(reg) || _.isRegExp(reg))
+                    && (_.isFunction(replacement) || _.isString(replacement))) {
+                    console.log(reg, replacement, '======')
+                    stream = stream.pipe(gulpReplace(reg, replacement, options))
+                }
+                return stream;
+            }, stream);
+            stream.pipe(gulpCached(`${conf.name}:${version}`))
+            stream.pipe(gulp.dest(`${dest}`))
             stream.on('end', () => {
                 done()
             })

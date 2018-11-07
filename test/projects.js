@@ -27,9 +27,13 @@ module.exports = function () {
             //tag
             //[ tag , branch 必填一项]
             tag: '',
-            pipe(content, filename, conf) {
-                return content
-            },
+            pipe: [ //请使用 [gulp-replace语法](https://www.npmjs.com/package/gulp-replace)
+                ['console.ksyun.com', '{$common.domain$}'],
+                ['ksyun', '---'],
+                ['com', function () {
+                    return this.file.relative
+                }]
+            ],
             //待替换资源路径 , `source`为空时,`target`不为空删除 , `target`为空`source`不为空 追加 ,其他时替换
             replace: [
                 {
