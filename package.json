@@ -5,9 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "preuninstall": "echo 'remove source' && rm -rf ./.__source",
-    "dev": "mkdir -p dist && babel src --watch --out-dir dist",
+    "dev": "rm -rf dist &&  mkdir -p dist && babel src --watch --out-dir dist",
     "gitcommit": "git add . && git commit --allow-empty -am 'build..'",
-    "build": "mkdir -p lib && babel src --out-dir dist && npm run gitcommit",
+    "build": "rm -rf dist && mkdir -p dist && babel src --out-dir dist && npm run gitcommit",
     "release": "npm run release-patch",
     "prelease": "npm run build && npm version prerelease && git push --tags --force && git push && npm publish",
     "release-patch": "npm run build && npm version patch && git push --tags && git push && npm publish",
@@ -42,6 +42,7 @@
     "gulp-sequence": "^1.0.0",
     "lodash": "^4.17.10",
     "mkdirp": "^0.5.1",
-    "moment": "^2.22.2"
+    "moment": "^2.22.2",
+    "pify": "^4.0.1"
   }
 }

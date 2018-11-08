@@ -4,17 +4,20 @@ import fs from 'fs';
 import _ from 'lodash';
 import mkdirp from 'mkdirp';
 import chalk from 'chalk';
+import globby from 'globby';
 import gulp from 'gulp';
 import gulpSequence from 'gulp-sequence';
 import gulpReplace from 'gulp-replace';
 import gulpCached from 'gulp-cached';
+import crypto from 'crypto';
 import gulpChanged from 'gulp-changed';
 import {readConfig} from './libs/parse-config';
 import {getAbsPath, tasks, runShell, findDependen} from './libs/core';
 import pkg from '../package.json'
+import pify from 'pify';
 
 const log = debug(pkg.name);
-
+const stat = pify(fs.stat);
 const dir = {
     source: path.resolve(__dirname, '../.__source'),
 }
@@ -52,19 +55,19 @@ class Kgr {
     }
 
     sourcePath(conf) {
-        const version = conf.tag || conf.branch;
+        const version = conf.version;
         const source = path.resolve(dir.source, '.source', conf.name, version);
         return source
     }
 
     tmpPath(conf) {
-        const version = conf.tag || conf.branch;
+        const version = conf.version;
         const tmp = path.resolve(dir.source, '.tmp', conf.name, version);
         return tmp
     }
 
     destPath(conf) {
-        let version = conf.tag || conf.branch;
+        let version = conf.version;
         let dest = path.resolve(dir.source, '.dest', conf.name, version);
         return dest
     }
@@ -77,9 +80,10 @@ class Kgr {
             throw new Error('please install git on your pc');
         }
         const url = conf.remote;
-        const version = conf.tag || conf.branch;
+        const version = conf.version;
         const source = this.sourcePath(conf);
         const tmp = this.tmpPath(conf);
+        const dest = this.destPath(conf);
         let tarName = `${conf.name}-${version}.tar.gz`;
         const _init = async () => {
             await runShell(`rm -rf ${source} && git clone -b ${version} ${url} ${source} && cd ${source} && rm -rf .git && echo 'success' > .kge_success`);
@@ -95,12 +99,20 @@ class Kgr {
 
         const _copy = async () => {
             await runShell(`mkdir -p ${tmp} && cd ${tmp} && tar -zxf ${path.resolve(source, tarName)}`)
+
         };
+        const _copyDest = async () => {
+            await runShell(`mkdir -p ${dest} && cd ${dest} && tar -zxf ${path.resolve(source, tarName)}`)
+        }
         if (args.copy) {
-            await _copy()
+            await _copy();
+            await _copyDest();
         }
         if (!fs.existsSync(path.resolve(tmp, '.kge_success'))) {
             await _copy()
+        }
+        if (!fs.existsSync(path.resolve(dest, '.kge_success'))) {
+            await _copyDest()
         }
         return conf
     }
@@ -110,7 +122,6 @@ class Kgr {
         let removePath = [];
         let replacePath = [];
         let addPath = [];
-        let version = conf.tag || conf.branch;
         let dest = this.destPath(conf);
         let tmp = this.tmpPath(conf);
         _.each(conf.replace, (file) => {
@@ -150,8 +161,27 @@ class Kgr {
         })
         gulp.task('pipe', (done) => {
             console.log(`${chalk.green(`run pipe task...`)}`);
-            let stream = gulp.src([tmp + '/**/*'])
+            let glob = [
+                `./**/*`,
+                '!./{bower_components,node_modules,dist,build}{,/**}',
+                `!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}`
+            ];
 
+            if (conf.glob) {
+                conf.glob = _.isArray(conf.glob) ? conf.glob : [conf.glob];
+                glob = glob.concat(conf.glob)
+            }
+
+            log(`find glob ---> start`);
+
+            glob = globby.sync(glob, {base: tmp, cwd: tmp, nodir: true})
+
+            log(`find glob ---> end`);
+            log(`${glob.join('\\n')}`);
+
+            log(`gulp src start`);
+            let stream = gulp.src(glob, {base: tmp, cwd: tmp, nodir: true});
+            log(`gulp src end`);
             let pipes = conf.pipe;
             if (!_.isArray(pipes)) {
                 pipes = [pipes];
@@ -171,12 +201,24 @@ class Kgr {
                 return stream;
             }, stream);
 
-            stream.pipe(gulpChanged(`${dest}`))
+            stream
+                .pipe(gulpCached(`${conf.name}:${conf.version}`))
+                // .pipe(gulpChanged(`${dest}`, {
+                //     hasChanged: function (stream, sourceFile, targetPath) {
+                //         // console.log(stream, sourceFile, targetPath)
+                //         return stat(targetPath).then((targetStat) => {
+                //             console.log(sourceFile.relative)
+                //             // console.log(stream)
+                //         })
+                //     }
+                // }))
                 .pipe(gulp.dest(`${dest}`))
                 .on('end', () => {
+                    log('end  pipe...')
                     done()
                 })
                 .on('error', function (err) {
+                    log(`error  pipe... ${err}`)
                     done(err);
                 });
         })
@@ -241,10 +283,16 @@ class Kgr {
                 return await this.gulp(name)
             },
             async (task) => {
+                const args = this.getArgs();
                 const conf = await this.configForName(name);
-                return gulpSequence('run')(() => {
+                return gulpSequence('run')(async () => {
                     let dest = this.destPath(conf);
                     if (!fs.existsSync(dest)) return
+                    if (fs.existsSync(args.output)) {
+                        await runShell(`cd ${args.output} && tar -zcf ${conf.name}.${conf.version}.tar.gz -C ${dest} .`);
+                    } else {
+                        console.log(`${chalk.yellow(`warning : args.output 不存在`)}`)
+                    }
                     console.log(`${chalk.green.underline(`success : ${dest}`)}`);
                 })
             }

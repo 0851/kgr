@@ -110,8 +110,8 @@ function readConfig(config) {
 function verifyConfig(options) {
     log("options ---> " + (0, _stringify2.default)(options));
     var result = (0, _reduce3.default)(options, function (verify, option) {
-        var mustInput = ['name', 'remote'];
-        var choiceInput = [['branch', 'tag']];
+        var mustInput = ['name', 'remote', 'version'];
+        var choiceInput = [];
         var keys = (0, _keys2.default)(option);
         log("keys ---> " + keys);
         while (mustInput.length) {

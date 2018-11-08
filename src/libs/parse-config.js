@@ -59,8 +59,8 @@ function readConfig(config) {
 function verifyConfig(options) {
     log(`options ---> ${JSON.stringify(options)}`)
     const result = _.reduce(options, (verify, option) => {
-        let mustInput = ['name', 'remote'];
-        let choiceInput = [['branch', 'tag']];
+        let mustInput = ['name', 'remote', 'version'];
+        let choiceInput = [];
         const keys = Object.keys(option);
         log(`keys ---> ${keys}`)
         while (mustInput.length) {
