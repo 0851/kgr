@@ -475,7 +475,7 @@ var Kgr = function () {
                                 })));
                                 _gulp3.default.task('pipe', function (done) {
                                     console.log('' + _chalk2.default.green('run pipe task...'));
-                                    var glob = ['./**/*', '!./node_modules/**/*', '!./{bower_components,node_modules,dist,build}{,/**}', '!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'];
+                                    var glob = ['./**/*', '!./{bower_components,node_modules,dist,build}{,/**}', '!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'];
 
                                     if (conf.glob) {
                                         conf.glob = (0, _isArray3.default)(conf.glob) ? conf.glob : [conf.glob];
@@ -769,14 +769,14 @@ var Kgr = function () {
     }, {
         key: 'build',
         value: function () {
-            var _ref19 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee20(name) {
+            var _ref19 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee21(name) {
                 var _this5 = this;
 
-                return _regenerator2.default.wrap(function _callee20$(_context20) {
+                return _regenerator2.default.wrap(function _callee21$(_context21) {
                     while (1) {
-                        switch (_context20.prev = _context20.next) {
+                        switch (_context21.prev = _context21.next) {
                             case 0:
-                                _context20.next = 2;
+                                _context21.next = 2;
                                 return (0, _core.tasks)([(0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee17() {
                                     return _regenerator2.default.wrap(function _callee17$(_context17) {
                                         while (1) {
@@ -812,29 +812,66 @@ var Kgr = function () {
                                         }
                                     }, _callee18, _this5);
                                 })), function () {
-                                    var _ref22 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee19(task) {
-                                        var conf;
-                                        return _regenerator2.default.wrap(function _callee19$(_context19) {
+                                    var _ref22 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee20(task) {
+                                        var args, conf;
+                                        return _regenerator2.default.wrap(function _callee20$(_context20) {
                                             while (1) {
-                                                switch (_context19.prev = _context19.next) {
+                                                switch (_context20.prev = _context20.next) {
                                                     case 0:
-                                                        _context19.next = 2;
+                                                        args = _this5.getArgs();
+                                                        _context20.next = 3;
                                                         return _this5.configForName(name);
 
-                                                    case 2:
-                                                        conf = _context19.sent;
-                                                        return _context19.abrupt('return', (0, _gulpSequence2.default)('run')(function () {
-                                                            var dest = _this5.destPath(conf);
-                                                            if (!_fs2.default.existsSync(dest)) return;
-                                                            console.log('' + _chalk2.default.green.underline('success : ' + dest));
-                                                        }));
+                                                    case 3:
+                                                        conf = _context20.sent;
+                                                        return _context20.abrupt('return', (0, _gulpSequence2.default)('run')((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee19() {
+                                                            var dest;
+                                                            return _regenerator2.default.wrap(function _callee19$(_context19) {
+                                                                while (1) {
+                                                                    switch (_context19.prev = _context19.next) {
+                                                                        case 0:
+                                                                            dest = _this5.destPath(conf);
 
-                                                    case 4:
+                                                                            if (_fs2.default.existsSync(dest)) {
+                                                                                _context19.next = 3;
+                                                                                break;
+                                                                            }
+
+                                                                            return _context19.abrupt('return');
+
+                                                                        case 3:
+                                                                            if (!_fs2.default.existsSync(args.output)) {
+                                                                                _context19.next = 8;
+                                                                                break;
+                                                                            }
+
+                                                                            _context19.next = 6;
+                                                                            return (0, _core.runShell)('cd ' + args.output + ' && tar -zcf ' + conf.name + '.' + conf.version + '.tar.gz -C ' + dest + ' .');
+
+                                                                        case 6:
+                                                                            _context19.next = 9;
+                                                                            break;
+
+                                                                        case 8:
+                                                                            console.log('' + _chalk2.default.yellow('warning : args.output \u4E0D\u5B58\u5728'));
+
+                                                                        case 9:
+                                                                            console.log('' + _chalk2.default.green.underline('success : ' + dest));
+
+                                                                        case 10:
+                                                                        case 'end':
+                                                                            return _context19.stop();
+                                                                    }
+                                                                }
+                                                            }, _callee19, _this5);
+                                                        }))));
+
+                                                    case 5:
                                                     case 'end':
-                                                        return _context19.stop();
+                                                        return _context20.stop();
                                                 }
                                             }
-                                        }, _callee19, _this5);
+                                        }, _callee20, _this5);
                                     }));
 
                                     return function (_x9) {
@@ -844,10 +881,10 @@ var Kgr = function () {
 
                             case 2:
                             case 'end':
-                                return _context20.stop();
+                                return _context21.stop();
                         }
                     }
-                }, _callee20, this);
+                }, _callee21, this);
             }));
 
             function build(_x8) {
@@ -859,18 +896,18 @@ var Kgr = function () {
     }, {
         key: 'run',
         value: function () {
-            var _ref23 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee21() {
+            var _ref24 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee22() {
                 var args, name, mode;
-                return _regenerator2.default.wrap(function _callee21$(_context21) {
+                return _regenerator2.default.wrap(function _callee22$(_context22) {
                     while (1) {
-                        switch (_context21.prev = _context21.next) {
+                        switch (_context22.prev = _context22.next) {
                             case 0:
                                 args = this.getArgs();
                                 name = args.name || this.setConfig()[0].name;
                                 mode = args.mode || 'dev';
 
                                 if (name) {
-                                    _context21.next = 5;
+                                    _context22.next = 5;
                                     break;
                                 }
 
@@ -878,32 +915,32 @@ var Kgr = function () {
 
                             case 5:
                                 if (!(mode === 'dev')) {
-                                    _context21.next = 8;
+                                    _context22.next = 8;
                                     break;
                                 }
 
-                                _context21.next = 8;
+                                _context22.next = 8;
                                 return this.dev(name);
 
                             case 8:
                                 if (!(mode === 'build')) {
-                                    _context21.next = 11;
+                                    _context22.next = 11;
                                     break;
                                 }
 
-                                _context21.next = 11;
+                                _context22.next = 11;
                                 return this.build(name);
 
                             case 11:
                             case 'end':
-                                return _context21.stop();
+                                return _context22.stop();
                         }
                     }
-                }, _callee21, this);
+                }, _callee22, this);
             }));
 
             function run() {
-                return _ref23.apply(this, arguments);
+                return _ref24.apply(this, arguments);
             }
 
             return run;
