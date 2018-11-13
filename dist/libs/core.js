@@ -129,10 +129,6 @@ var _through = require('through2');
 
 var _through2 = _interopRequireDefault(_through);
 
-var _vinylFs = require('vinyl-fs');
-
-var _vinylFs2 = _interopRequireDefault(_vinylFs);
-
 var _globby = require('globby');
 
 var _globby2 = _interopRequireDefault(_globby);

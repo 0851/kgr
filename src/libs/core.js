@@ -6,7 +6,6 @@ import fs from 'fs';
 import {spawn, exec} from 'child_process';
 import detect from 'detect-import-require';
 import through from 'through2';
-import vfs from 'vinyl-fs';
 import globby from 'globby';
 import del from 'del';
 

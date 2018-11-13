@@ -6,19 +6,16 @@ import mkdirp from 'mkdirp';
 import chalk from 'chalk';
 import globby from 'globby';
 import gulp from 'gulp';
-import gulpSequence from 'gulp-sequence';
 import gulpReplace from 'gulp-replace';
 import gulpCached from 'gulp-cached';
+import through from 'through2';
 import crypto from 'crypto';
-import gulpChanged from 'gulp-changed';
 import {readConfig} from './libs/parse-config';
 import {getAbsPath, tasks, runShell, findDependen, gulpCUD} from './libs/core';
 import pkg from '../package.json';
 import pify from 'pify';
-import ncp from 'ncp';
 
 const log = debug(pkg.name);
-const stat = pify(fs.stat);
 
 class Kgr {
     constructor(args) {
@@ -146,8 +143,8 @@ class Kgr {
     }
 
     async gulp(name) {
-        const conf = await this.configForName(name);
-        gulp.task('pipe', (done) => {
+        return new Promise(async (resolve, reject) => {
+            const conf = await this.configForName(name);
             console.log(`${chalk.green(`run pipe task...`)}`);
             let tmp = this.sourcePath(conf);
             let dest = this.destPath(conf);
@@ -205,17 +202,14 @@ class Kgr {
                 .pipe(gulpCached(`${conf.name}:${conf.version}`))
                 .pipe(gulp.dest(`${dest}`))
                 .on('end', () => {
-                    log('end  pipe...');
-                    done();
+                    log('end pipe...');
+                    resolve();
                 })
                 .on('error', function (err) {
-                    log(`error  pipe... ${err}`);
-                    done(err);
+                    log(`error pipe... ${err}`);
+                    reject(err);
                 });
-        });
-        return gulp.task('run', (done) => {
-            return gulpSequence('pipe', done);
-        });
+        })
     }
 
     async devServer(name) {
@@ -231,8 +225,8 @@ class Kgr {
             });
             gulp.watch(files, async (event) => {
                 console.log(`${chalk.yellow(`File ${event.path} was ${event.type} , running tasks...`)}`);
-                await this.gulp(name);
-                gulpSequence('run')(async () => {
+                try {
+                    await this.gulp(name);
                     const conf = await this.configForName(name);
                     let dest = this.destPath(conf);
                     if (!fs.existsSync(dest)) {
@@ -248,11 +242,13 @@ class Kgr {
                         }
                         console.log(`${chalk.green.underline(`restart : ${dest}`)}`);
                     }
-                });
+                } catch (e) {
+                    throw e;
+                }
             });
         }
-        await this.gulp(name);
-        gulpSequence('run')(async () => {
+        try {
+            await this.gulp(name);
             const conf = await this.configForName(name);
             let dest = this.destPath(conf);
             if (!fs.existsSync(dest)) {
@@ -268,7 +264,9 @@ class Kgr {
             }
             console.log(`${chalk.green.underline(`success : ${dest}`)}`);
             await watch();
-        });
+        } catch (e) {
+            throw e
+        }
     }
 
     async dev(name) {
@@ -291,18 +289,16 @@ class Kgr {
                 await this.gulp(name);
                 const args = this.getArgs();
                 const conf = await this.configForName(name);
-                return gulpSequence('run')(async () => {
-                    let dest = this.destPath(conf);
-                    if (!fs.existsSync(dest)) return;
-                    if (fs.existsSync(args.output)) {
-                        await runShell(
-                            `cd ${args.output} && tar -zcf ${conf.name}.${conf.version}.tar.gz -C ${dest} .`
-                        );
-                    } else {
-                        console.log(`${chalk.yellow(`warning : args.output 不存在`)}`);
-                    }
-                    console.log(`${chalk.green.underline(`success : ${dest}`)}`);
-                });
+                let dest = this.destPath(conf);
+                if (!fs.existsSync(dest)) return;
+                if (fs.existsSync(args.output)) {
+                    await runShell(
+                        `cd ${args.output} && tar -zcf ${conf.name}.${conf.version}.tar.gz -C ${dest} .`
+                    );
+                } else {
+                    console.log(`${chalk.yellow(`warning : args.output 不存在`)}`);
+                }
+                console.log(`${chalk.green.underline(`success : ${dest}`)}`);
             }
         ]);
     }

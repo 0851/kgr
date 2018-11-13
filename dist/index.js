@@ -4,6 +4,10 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _promise = require('babel-runtime/core-js/promise');
+
+var _promise2 = _interopRequireDefault(_promise);
+
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -84,10 +88,6 @@ var _gulp2 = require('gulp');
 
 var _gulp3 = _interopRequireDefault(_gulp2);
 
-var _gulpSequence = require('gulp-sequence');
-
-var _gulpSequence2 = _interopRequireDefault(_gulpSequence);
-
 var _gulpReplace = require('gulp-replace');
 
 var _gulpReplace2 = _interopRequireDefault(_gulpReplace);
@@ -96,13 +96,13 @@ var _gulpCached = require('gulp-cached');
 
 var _gulpCached2 = _interopRequireDefault(_gulpCached);
 
+var _through = require('through2');
+
+var _through2 = _interopRequireDefault(_through);
+
 var _crypto = require('crypto');
 
 var _crypto2 = _interopRequireDefault(_crypto);
-
-var _gulpChanged = require('gulp-changed');
-
-var _gulpChanged2 = _interopRequireDefault(_gulpChanged);
 
 var _parseConfig = require('./libs/parse-config');
 
@@ -116,14 +116,9 @@ var _pify = require('pify');
 
 var _pify2 = _interopRequireDefault(_pify);
 
-var _ncp = require('ncp');
-
-var _ncp2 = _interopRequireDefault(_ncp);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var log = (0, _debug2.default)(_package2.default.name);
-var stat = (0, _pify2.default)(_fs2.default.stat);
 
 var Kgr = function () {
     function Kgr(args) {
@@ -382,80 +377,97 @@ var Kgr = function () {
     }, {
         key: 'gulp',
         value: function () {
-            var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(name) {
+            var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(name) {
                 var _this2 = this;
 
-                var conf;
-                return _regenerator2.default.wrap(function _callee4$(_context4) {
+                return _regenerator2.default.wrap(function _callee5$(_context5) {
                     while (1) {
-                        switch (_context4.prev = _context4.next) {
+                        switch (_context5.prev = _context5.next) {
                             case 0:
-                                _context4.next = 2;
-                                return this.configForName(name);
+                                return _context5.abrupt('return', new _promise2.default(function () {
+                                    var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(resolve, reject) {
+                                        var conf, tmp, dest, glob, opt, stream, pipes;
+                                        return _regenerator2.default.wrap(function _callee4$(_context4) {
+                                            while (1) {
+                                                switch (_context4.prev = _context4.next) {
+                                                    case 0:
+                                                        _context4.next = 2;
+                                                        return _this2.configForName(name);
 
-                            case 2:
-                                conf = _context4.sent;
+                                                    case 2:
+                                                        conf = _context4.sent;
 
-                                _gulp3.default.task('pipe', function (done) {
-                                    console.log('' + _chalk2.default.green('run pipe task...'));
-                                    var tmp = _this2.sourcePath(conf);
-                                    var dest = _this2.destPath(conf);
+                                                        console.log('' + _chalk2.default.green('run pipe task...'));
+                                                        tmp = _this2.sourcePath(conf);
+                                                        dest = _this2.destPath(conf);
+                                                        glob = ['./**/*', '!./{bower_components,node_modules,dist,build}{,/**}', '!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'];
 
-                                    var glob = ['./**/*', '!./{bower_components,node_modules,dist,build}{,/**}', '!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'];
 
-                                    if (conf.glob) {
-                                        conf.glob = (0, _isArray3.default)(conf.glob) ? conf.glob : [conf.glob];
-                                        glob = glob.concat(conf.glob);
-                                    }
+                                                        if (conf.glob) {
+                                                            conf.glob = (0, _isArray3.default)(conf.glob) ? conf.glob : [conf.glob];
+                                                            glob = glob.concat(conf.glob);
+                                                        }
 
-                                    log('find glob ---> start');
-                                    var opt = { base: tmp, cwd: tmp, nodir: true };
-                                    glob = _globby2.default.sync(glob, opt);
+                                                        log('find glob ---> start');
+                                                        opt = { base: tmp, cwd: tmp, nodir: true };
 
-                                    log('find glob ---> end');
-                                    log('' + glob.join('\\n'));
+                                                        glob = _globby2.default.sync(glob, opt);
 
-                                    log('gulp src start');
+                                                        log('find glob ---> end');
+                                                        log('' + glob.join('\\n'));
 
-                                    var stream = _gulp3.default.src(glob, opt);
-                                    // .pipe(gulpCUD(conf.replace, tmp, dest, conf));
-                                    log('gulp src end');
-                                    var pipes = conf.pipe;
-                                    if (!(0, _isArray3.default)(pipes)) {
-                                        pipes = [pipes];
-                                    }
+                                                        log('gulp src start');
 
-                                    stream = (0, _reduce3.default)(pipes, function (stream, pipe) {
-                                        if (!(0, _isArray3.default)(pipe)) {
-                                            return stream;
-                                        }
-                                        var reg = pipe[0];
-                                        var replacement = pipe[1];
-                                        var options = pipe[2];
-                                        if (((0, _isString3.default)(reg) || (0, _isRegExp3.default)(reg)) && ((0, _isFunction3.default)(replacement) || (0, _isString3.default)(replacement))) {
-                                            stream = stream.pipe((0, _gulpReplace2.default)(reg, replacement, options));
-                                        }
-                                        return stream;
-                                    }, stream);
+                                                        stream = _gulp3.default.src(glob, opt);
+                                                        // .pipe(gulpCUD(conf.replace, tmp, dest, conf));
 
-                                    stream.pipe((0, _gulpCached2.default)(conf.name + ':' + conf.version)).pipe(_gulp3.default.dest('' + dest)).on('end', function () {
-                                        log('end  pipe...');
-                                        done();
-                                    }).on('error', function (err) {
-                                        log('error  pipe... ' + err);
-                                        done(err);
-                                    });
-                                });
-                                return _context4.abrupt('return', _gulp3.default.task('run', function (done) {
-                                    return (0, _gulpSequence2.default)('pipe', done);
-                                }));
+                                                        log('gulp src end');
+                                                        pipes = conf.pipe;
 
-                            case 5:
+                                                        if (!(0, _isArray3.default)(pipes)) {
+                                                            pipes = [pipes];
+                                                        }
+
+                                                        stream = (0, _reduce3.default)(pipes, function (stream, pipe) {
+                                                            if (!(0, _isArray3.default)(pipe)) {
+                                                                return stream;
+                                                            }
+                                                            var reg = pipe[0];
+                                                            var replacement = pipe[1];
+                                                            var options = pipe[2];
+                                                            if (((0, _isString3.default)(reg) || (0, _isRegExp3.default)(reg)) && ((0, _isFunction3.default)(replacement) || (0, _isString3.default)(replacement))) {
+                                                                stream = stream.pipe((0, _gulpReplace2.default)(reg, replacement, options));
+                                                            }
+                                                            return stream;
+                                                        }, stream);
+
+                                                        stream.pipe((0, _gulpCached2.default)(conf.name + ':' + conf.version)).pipe(_gulp3.default.dest('' + dest)).on('end', function () {
+                                                            log('end pipe...');
+                                                            resolve();
+                                                        }).on('error', function (err) {
+                                                            log('error pipe... ' + err);
+                                                            reject(err);
+                                                        });
+
+                                                    case 20:
+                                                    case 'end':
+                                                        return _context4.stop();
+                                                }
+                                            }
+                                        }, _callee4, _this2);
+                                    }));
+
+                                    return function (_x3, _x4) {
+                                        return _ref7.apply(this, arguments);
+                                    };
+                                }()));
+
+                            case 1:
                             case 'end':
-                                return _context4.stop();
+                                return _context5.stop();
                         }
                     }
-                }, _callee4, this);
+                }, _callee5, this);
             }));
 
             function gulp(_x2) {
@@ -467,18 +479,18 @@ var Kgr = function () {
     }, {
         key: 'devServer',
         value: function () {
-            var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(name) {
+            var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(name) {
                 var _this3 = this;
 
-                var bash, watch;
-                return _regenerator2.default.wrap(function _callee9$(_context9) {
+                var bash, watch, conf, dest, shell;
+                return _regenerator2.default.wrap(function _callee8$(_context8) {
                     while (1) {
-                        switch (_context9.prev = _context9.next) {
+                        switch (_context8.prev = _context8.next) {
                             case 0:
                                 bash = null;
 
                                 watch = function () {
-                                    var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7() {
+                                    var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7() {
                                         var conf, files;
                                         return _regenerator2.default.wrap(function _callee7$(_context7) {
                                             while (1) {
@@ -502,82 +514,80 @@ var Kgr = function () {
                                                             }
                                                         });
                                                         _gulp3.default.watch(files, function () {
-                                                            var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(event) {
+                                                            var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(event) {
+                                                                var _conf, dest, shell;
+
                                                                 return _regenerator2.default.wrap(function _callee6$(_context6) {
                                                                     while (1) {
                                                                         switch (_context6.prev = _context6.next) {
                                                                             case 0:
                                                                                 console.log('' + _chalk2.default.yellow('File ' + event.path + ' was ' + event.type + ' , running tasks...'));
-                                                                                _context6.next = 3;
+                                                                                _context6.prev = 1;
+                                                                                _context6.next = 4;
                                                                                 return _this3.gulp(name);
 
-                                                                            case 3:
-                                                                                (0, _gulpSequence2.default)('run')((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5() {
-                                                                                    var conf, dest, shell;
-                                                                                    return _regenerator2.default.wrap(function _callee5$(_context5) {
-                                                                                        while (1) {
-                                                                                            switch (_context5.prev = _context5.next) {
-                                                                                                case 0:
-                                                                                                    _context5.next = 2;
-                                                                                                    return _this3.configForName(name);
-
-                                                                                                case 2:
-                                                                                                    conf = _context5.sent;
-                                                                                                    dest = _this3.destPath(conf);
-
-                                                                                                    if (_fs2.default.existsSync(dest)) {
-                                                                                                        _context5.next = 6;
-                                                                                                        break;
-                                                                                                    }
-
-                                                                                                    throw new Error('can fount dest path ' + dest);
-
-                                                                                                case 6:
-                                                                                                    if (!conf.restart) {
-                                                                                                        _context5.next = 19;
-                                                                                                        break;
-                                                                                                    }
-
-                                                                                                    _context5.prev = 7;
-
-                                                                                                    bash && bash.kill && bash.kill();
-                                                                                                    _context5.next = 11;
-                                                                                                    return (0, _core.runShell)(conf.restart, { cwd: dest });
-
-                                                                                                case 11:
-                                                                                                    shell = _context5.sent;
-
-                                                                                                    bash = shell[2];
-                                                                                                    _context5.next = 18;
-                                                                                                    break;
-
-                                                                                                case 15:
-                                                                                                    _context5.prev = 15;
-                                                                                                    _context5.t0 = _context5['catch'](7);
-
-                                                                                                    console.error(_context5.t0);
-
-                                                                                                case 18:
-                                                                                                    console.log('' + _chalk2.default.green.underline('restart : ' + dest));
-
-                                                                                                case 19:
-                                                                                                case 'end':
-                                                                                                    return _context5.stop();
-                                                                                            }
-                                                                                        }
-                                                                                    }, _callee5, _this3, [[7, 15]]);
-                                                                                })));
-
                                                                             case 4:
+                                                                                _context6.next = 6;
+                                                                                return _this3.configForName(name);
+
+                                                                            case 6:
+                                                                                _conf = _context6.sent;
+                                                                                dest = _this3.destPath(_conf);
+
+                                                                                if (_fs2.default.existsSync(dest)) {
+                                                                                    _context6.next = 10;
+                                                                                    break;
+                                                                                }
+
+                                                                                throw new Error('can fount dest path ' + dest);
+
+                                                                            case 10:
+                                                                                if (!_conf.restart) {
+                                                                                    _context6.next = 23;
+                                                                                    break;
+                                                                                }
+
+                                                                                _context6.prev = 11;
+
+                                                                                bash && bash.kill && bash.kill();
+                                                                                _context6.next = 15;
+                                                                                return (0, _core.runShell)(_conf.restart, { cwd: dest });
+
+                                                                            case 15:
+                                                                                shell = _context6.sent;
+
+                                                                                bash = shell[2];
+                                                                                _context6.next = 22;
+                                                                                break;
+
+                                                                            case 19:
+                                                                                _context6.prev = 19;
+                                                                                _context6.t0 = _context6['catch'](11);
+
+                                                                                console.error(_context6.t0);
+
+                                                                            case 22:
+                                                                                console.log('' + _chalk2.default.green.underline('restart : ' + dest));
+
+                                                                            case 23:
+                                                                                _context6.next = 28;
+                                                                                break;
+
+                                                                            case 25:
+                                                                                _context6.prev = 25;
+                                                                                _context6.t1 = _context6['catch'](1);
+                                                                                throw _context6.t1;
+
+                                                                            case 28:
                                                                             case 'end':
                                                                                 return _context6.stop();
                                                                         }
                                                                     }
-                                                                }, _callee6, _this3);
+                                                                }, _callee6, _this3, [[1, 25], [11, 19]]);
                                                             }));
 
-                                                            return function (_x4) {
-                                                                return _ref9.apply(this, arguments);
+                                                            return function (_x6) {
+                                                                return _ref10.apply(this, arguments);
                                                             };
                                                         }());
 
@@ -590,80 +600,76 @@ var Kgr = function () {
                                     }));
 
                                     return function watch() {
-                                        return _ref8.apply(this, arguments);
+                                        return _ref9.apply(this, arguments);
                                     };
                                 }();
 
-                                _context9.next = 4;
+                                _context8.prev = 2;
+                                _context8.next = 5;
                                 return this.gulp(name);
 
-                            case 4:
-                                (0, _gulpSequence2.default)('run')((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8() {
-                                    var conf, dest, shell;
-                                    return _regenerator2.default.wrap(function _callee8$(_context8) {
-                                        while (1) {
-                                            switch (_context8.prev = _context8.next) {
-                                                case 0:
-                                                    _context8.next = 2;
-                                                    return _this3.configForName(name);
-
-                                                case 2:
-                                                    conf = _context8.sent;
-                                                    dest = _this3.destPath(conf);
-
-                                                    if (_fs2.default.existsSync(dest)) {
-                                                        _context8.next = 6;
-                                                        break;
-                                                    }
-
-                                                    throw new Error('can fount dest path ' + dest);
-
-                                                case 6:
-                                                    if (!conf.start) {
-                                                        _context8.next = 17;
-                                                        break;
-                                                    }
-
-                                                    _context8.prev = 7;
-                                                    _context8.next = 10;
-                                                    return (0, _core.runShell)(conf.start, { cwd: dest });
-
-                                                case 10:
-                                                    shell = _context8.sent;
-
-                                                    bash = shell[2];
-                                                    _context8.next = 17;
-                                                    break;
-
-                                                case 14:
-                                                    _context8.prev = 14;
-                                                    _context8.t0 = _context8['catch'](7);
-
-                                                    console.error(_context8.t0);
-
-                                                case 17:
-                                                    console.log('' + _chalk2.default.green.underline('success : ' + dest));
-                                                    _context8.next = 20;
-                                                    return watch();
-
-                                                case 20:
-                                                case 'end':
-                                                    return _context8.stop();
-                                            }
-                                        }
-                                    }, _callee8, _this3, [[7, 14]]);
-                                })));
-
                             case 5:
+                                _context8.next = 7;
+                                return this.configForName(name);
+
+                            case 7:
+                                conf = _context8.sent;
+                                dest = this.destPath(conf);
+
+                                if (_fs2.default.existsSync(dest)) {
+                                    _context8.next = 11;
+                                    break;
+                                }
+
+                                throw new Error('can fount dest path ' + dest);
+
+                            case 11:
+                                if (!conf.start) {
+                                    _context8.next = 22;
+                                    break;
+                                }
+
+                                _context8.prev = 12;
+                                _context8.next = 15;
+                                return (0, _core.runShell)(conf.start, { cwd: dest });
+
+                            case 15:
+                                shell = _context8.sent;
+
+                                bash = shell[2];
+                                _context8.next = 22;
+                                break;
+
+                            case 19:
+                                _context8.prev = 19;
+                                _context8.t0 = _context8['catch'](12);
+
+                                console.error(_context8.t0);
+
+                            case 22:
+                                console.log('' + _chalk2.default.green.underline('success : ' + dest));
+                                _context8.next = 25;
+                                return watch();
+
+                            case 25:
+                                _context8.next = 30;
+                                break;
+
+                            case 27:
+                                _context8.prev = 27;
+                                _context8.t1 = _context8['catch'](2);
+                                throw _context8.t1;
+
+                            case 30:
                             case 'end':
-                                return _context9.stop();
+                                return _context8.stop();
                         }
                     }
-                }, _callee9, this);
+                }, _callee8, this, [[2, 27], [12, 19]]);
             }));
 
-            function devServer(_x3) {
-                return _ref7.apply(this, arguments);
+            function devServer(_x5) {
+                return _ref8.apply(this, arguments);
             }
 
             return devServer;
@@ -671,21 +677,38 @@ var Kgr = function () {
     }, {
         key: 'dev',
         value: function () {
-            var _ref12 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12(name) {
+            var _ref11 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11(name) {
                 var _this4 = this;
 
-                return _regenerator2.default.wrap(function _callee12$(_context12) {
+                return _regenerator2.default.wrap(function _callee11$(_context11) {
                     while (1) {
-                        switch (_context12.prev = _context12.next) {
+                        switch (_context11.prev = _context11.next) {
                             case 0:
-                                _context12.next = 2;
-                                return (0, _core.tasks)([(0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10() {
+                                _context11.next = 2;
+                                return (0, _core.tasks)([(0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9() {
+                                    return _regenerator2.default.wrap(function _callee9$(_context9) {
+                                        while (1) {
+                                            switch (_context9.prev = _context9.next) {
+                                                case 0:
+                                                    _context9.next = 2;
+                                                    return _this4.init(name);
+
+                                                case 2:
+                                                    return _context9.abrupt('return', _context9.sent);
+
+                                                case 3:
+                                                case 'end':
+                                                    return _context9.stop();
+                                            }
+                                        }
+                                    }, _callee9, _this4);
+                                })), (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10() {
                                     return _regenerator2.default.wrap(function _callee10$(_context10) {
                                         while (1) {
                                             switch (_context10.prev = _context10.next) {
                                                 case 0:
                                                     _context10.next = 2;
-                                                    return _this4.init(name);
+                                                    return _this4.devServer(name);
 
                                                 case 2:
                                                     return _context10.abrupt('return', _context10.sent);
@@ -696,35 +719,18 @@ var Kgr = function () {
                                             }
                                         }
                                     }, _callee10, _this4);
-                                })), (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11() {
-                                    return _regenerator2.default.wrap(function _callee11$(_context11) {
-                                        while (1) {
-                                            switch (_context11.prev = _context11.next) {
-                                                case 0:
-                                                    _context11.next = 2;
-                                                    return _this4.devServer(name);
-
-                                                case 2:
-                                                    return _context11.abrupt('return', _context11.sent);
-
-                                                case 3:
-                                                case 'end':
-                                                    return _context11.stop();
-                                            }
-                                        }
-                                    }, _callee11, _this4);
                                 }))]);
 
                             case 2:
                             case 'end':
-                                return _context12.stop();
+                                return _context11.stop();
                         }
                     }
-                }, _callee12, this);
+                }, _callee11, this);
             }));
 
-            function dev(_x5) {
-                return _ref12.apply(this, arguments);
+            function dev(_x7) {
+                return _ref11.apply(this, arguments);
             }
 
             return dev;
@@ -732,107 +738,93 @@ var Kgr = function () {
     }, {
         key: 'build',
         value: function () {
-            var _ref15 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee16(name) {
+            var _ref14 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee14(name) {
                 var _this5 = this;
 
-                return _regenerator2.default.wrap(function _callee16$(_context16) {
+                return _regenerator2.default.wrap(function _callee14$(_context14) {
                     while (1) {
-                        switch (_context16.prev = _context16.next) {
+                        switch (_context14.prev = _context14.next) {
                             case 0:
-                                _context16.next = 2;
-                                return (0, _core.tasks)([(0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13() {
+                                _context14.next = 2;
+                                return (0, _core.tasks)([(0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12() {
+                                    return _regenerator2.default.wrap(function _callee12$(_context12) {
+                                        while (1) {
+                                            switch (_context12.prev = _context12.next) {
+                                                case 0:
+                                                    _context12.next = 2;
+                                                    return _this5.init(name);
+
+                                                case 2:
+                                                    return _context12.abrupt('return', _context12.sent);
+
+                                                case 3:
+                                                case 'end':
+                                                    return _context12.stop();
+                                            }
+                                        }
+                                    }, _callee12, _this5);
+                                })), (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13() {
+                                    var args, conf, dest;
                                     return _regenerator2.default.wrap(function _callee13$(_context13) {
                                         while (1) {
                                             switch (_context13.prev = _context13.next) {
                                                 case 0:
                                                     _context13.next = 2;
-                                                    return _this5.init(name);
+                                                    return _this5.gulp(name);
 
                                                 case 2:
-                                                    return _context13.abrupt('return', _context13.sent);
+                                                    args = _this5.getArgs();
+                                                    _context13.next = 5;
+                                                    return _this5.configForName(name);
 
-                                                case 3:
+                                                case 5:
+                                                    conf = _context13.sent;
+                                                    dest = _this5.destPath(conf);
+
+                                                    if (_fs2.default.existsSync(dest)) {
+                                                        _context13.next = 9;
+                                                        break;
+                                                    }
+
+                                                    return _context13.abrupt('return');
+
+                                                case 9:
+                                                    if (!_fs2.default.existsSync(args.output)) {
+                                                        _context13.next = 14;
+                                                        break;
+                                                    }
+
+                                                    _context13.next = 12;
+                                                    return (0, _core.runShell)('cd ' + args.output + ' && tar -zcf ' + conf.name + '.' + conf.version + '.tar.gz -C ' + dest + ' .');
+
+                                                case 12:
+                                                    _context13.next = 15;
+                                                    break;
+
+                                                case 14:
+                                                    console.log('' + _chalk2.default.yellow('warning : args.output \u4E0D\u5B58\u5728'));
+
+                                                case 15:
+                                                    console.log('' + _chalk2.default.green.underline('success : ' + dest));
+
+                                                case 16:
                                                 case 'end':
                                                     return _context13.stop();
                                             }
                                         }
                                     }, _callee13, _this5);
-                                })), (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee15() {
-                                    var args, conf;
-                                    return _regenerator2.default.wrap(function _callee15$(_context15) {
-                                        while (1) {
-                                            switch (_context15.prev = _context15.next) {
-                                                case 0:
-                                                    _context15.next = 2;
-                                                    return _this5.gulp(name);
-
-                                                case 2:
-                                                    args = _this5.getArgs();
-                                                    _context15.next = 5;
-                                                    return _this5.configForName(name);
-
-                                                case 5:
-                                                    conf = _context15.sent;
-                                                    return _context15.abrupt('return', (0, _gulpSequence2.default)('run')((0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee14() {
-                                                        var dest;
-                                                        return _regenerator2.default.wrap(function _callee14$(_context14) {
-                                                            while (1) {
-                                                                switch (_context14.prev = _context14.next) {
-                                                                    case 0:
-                                                                        dest = _this5.destPath(conf);
-
-                                                                        if (_fs2.default.existsSync(dest)) {
-                                                                            _context14.next = 3;
-                                                                            break;
-                                                                        }
-
-                                                                        return _context14.abrupt('return');
-
-                                                                    case 3:
-                                                                        if (!_fs2.default.existsSync(args.output)) {
-                                                                            _context14.next = 8;
-                                                                            break;
-                                                                        }
-
-                                                                        _context14.next = 6;
-                                                                        return (0, _core.runShell)('cd ' + args.output + ' && tar -zcf ' + conf.name + '.' + conf.version + '.tar.gz -C ' + dest + ' .');
-
-                                                                    case 6:
-                                                                        _context14.next = 9;
-                                                                        break;
-
-                                                                    case 8:
-                                                                        console.log('' + _chalk2.default.yellow('warning : args.output \u4E0D\u5B58\u5728'));
-
-                                                                    case 9:
-                                                                        console.log('' + _chalk2.default.green.underline('success : ' + dest));
-
-                                                                    case 10:
-                                                                    case 'end':
-                                                                        return _context14.stop();
-                                                                }
-                                                            }
-                                                        }, _callee14, _this5);
-                                                    }))));
-
-                                                case 7:
-                                                case 'end':
-                                                    return _context15.stop();
-                                            }
-                                        }
-                                    }, _callee15, _this5);
                                 }))]);
 
                             case 2:
                             case 'end':
-                                return _context16.stop();
+                                return _context14.stop();
                         }
                     }
-                }, _callee16, this);
+                }, _callee14, this);
             }));
 
-            function build(_x6) {
-                return _ref15.apply(this, arguments);
+            function build(_x8) {
+                return _ref14.apply(this, arguments);
             }
 
             return build;
@@ -840,18 +832,18 @@ var Kgr = function () {
     }, {
         key: 'run',
         value: function () {
-            var _ref19 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee17() {
+            var _ref17 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee15() {
                 var args, name, mode;
-                return _regenerator2.default.wrap(function _callee17$(_context17) {
+                return _regenerator2.default.wrap(function _callee15$(_context15) {
                     while (1) {
-                        switch (_context17.prev = _context17.next) {
+                        switch (_context15.prev = _context15.next) {
                             case 0:
                                 args = this.getArgs();
                                 name = args.name || this.setConfig()[0].name;
                                 mode = args.mode || 'dev';
 
                                 if (name) {
-                                    _context17.next = 5;
+                                    _context15.next = 5;
                                     break;
                                 }
 
@@ -859,32 +851,32 @@ var Kgr = function () {
 
                             case 5:
                                 if (!(mode === 'dev')) {
-                                    _context17.next = 8;
+                                    _context15.next = 8;
                                     break;
                                 }
 
-                                _context17.next = 8;
+                                _context15.next = 8;
                                 return this.dev(name);
 
                             case 8:
                                 if (!(mode === 'build')) {
-                                    _context17.next = 11;
+                                    _context15.next = 11;
                                     break;
                                 }
 
-                                _context17.next = 11;
+                                _context15.next = 11;
                                 return this.build(name);
 
                             case 11:
                             case 'end':
-                                return _context17.stop();
+                                return _context15.stop();
                         }
                     }
-                }, _callee17, this);
+                }, _callee15, this);
             }));
 
             function run() {
-                return _ref19.apply(this, arguments);
+                return _ref17.apply(this, arguments);
             }
 
             return run;

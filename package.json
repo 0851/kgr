@@ -38,15 +38,12 @@
     "globby": "^8.0.1",
     "gulp": "^3.9.1",
     "gulp-cached": "^1.1.1",
-    "gulp-changed": "^3.2.0",
     "gulp-replace": "^1.0.0",
-    "gulp-sequence": "^1.0.0",
     "lodash": "^4.17.10",
     "mkdirp": "^0.5.1",
     "moment": "^2.22.2",
-    "ncp": "^2.0.0",
     "pify": "^4.0.1",
     "through2": "^3.0.0",
-    "vinyl-fs": "^3.0.3"
+    "vinyl": "^2.2.0"
   }
 }
