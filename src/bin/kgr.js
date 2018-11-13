@@ -10,6 +10,7 @@ commander
         return val.split(',');
     })
     .option('-o, --output [output]', 'output path', 'dist')
+    .option('-t, --tmp [tmp]', 'tmp path', '.source')
     .option('-m, --mode [mode]', 'run project mode , default dev', 'dev')
     .option('-n, --name [name]', 'run project name , default find first name in config file', '')
     .option('--init [init]', 'init project', '')

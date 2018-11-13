@@ -33,6 +33,7 @@
     "chalk": "latest",
     "commander": "^2.19.0",
     "debug": "^4.1.0",
+    "del": "^3.0.0",
     "detect-import-require": "^2.0.0",
     "globby": "^8.0.1",
     "gulp": "^3.9.1",
@@ -43,6 +44,9 @@
     "lodash": "^4.17.10",
     "mkdirp": "^0.5.1",
     "moment": "^2.22.2",
-    "pify": "^4.0.1"
+    "ncp": "^2.0.0",
+    "pify": "^4.0.1",
+    "through2": "^3.0.0",
+    "vinyl-fs": "^3.0.3"
   }
 }

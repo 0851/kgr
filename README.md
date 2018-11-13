@@ -12,6 +12,7 @@ Options:
   -V, --version          output the version number
   -c, --config [config]  config file ',' separated, glob mode
   -o, --output [output]  output path (default: "dist")
+  -t, --tmp [tmp]        tmp path (default: ".source")
   -m, --mode [mode]      run project mode , default dev (default: "dev")
   -n, --name [name]      run project name , default find first name in config file (default: "")
   --init [init]          init project (default: "") 是否需要重新init
@@ -57,7 +58,7 @@ module.exports = function () {
             //项目名 , 如没有output参数时,做导出目录的目录名
             name: 'components',
             //需要执行的初始化命令
-            bash: 'npm install lodash --verbose',
+            init: 'npm install lodash --verbose',
             //启动命令 ,mode dev时执行
             start: 'ls',
             //文件改变后命令 , 空代表改变文件后不触发操作 , mode dev 时执行
