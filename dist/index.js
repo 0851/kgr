@@ -112,6 +112,10 @@ var _package = require('../package.json');
 
 var _package2 = _interopRequireDefault(_package);
 
+var _vinyl = require('vinyl');
+
+var _vinyl2 = _interopRequireDefault(_vinyl);
+
 var _pify = require('pify');
 
 var _pify2 = _interopRequireDefault(_pify);
@@ -386,15 +390,16 @@ var Kgr = function () {
                             case 0:
                                 return _context5.abrupt('return', new _promise2.default(function () {
                                     var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(resolve, reject) {
-                                        var conf, tmp, dest, glob, opt, stream, pipes;
+                                        var conf, tmp, dest, glob, opt, files, stream, pipes;
                                         return _regenerator2.default.wrap(function _callee4$(_context4) {
                                             while (1) {
                                                 switch (_context4.prev = _context4.next) {
                                                     case 0:
-                                                        _context4.next = 2;
+                                                        _context4.prev = 0;
+                                                        _context4.next = 3;
                                                         return _this2.configForName(name);
 
-                                                    case 2:
+                                                    case 3:
                                                         conf = _context4.sent;
 
                                                         console.log('' + _chalk2.default.green('run pipe task...'));
@@ -418,8 +423,19 @@ var Kgr = function () {
 
                                                         log('gulp src start');
 
-                                                        stream = _gulp3.default.src(glob, opt);
-                                                        // .pipe(gulpCUD(conf.replace, tmp, dest, conf));
+                                                        //得到需要处理的文件
+                                                        files = (0, _core.getFiles)(conf.replace, _path2.default.dirname(conf.__filename), tmp);
+                                                        stream = _gulp3.default.src(glob, opt)
+                                                        //对流进行预先处理 , 追加文件,替换文件,删除文件,等
+                                                        .pipe((0, _core.gulpCUD)(files, tmp, dest)).pipe(function () {
+                                                            return _through2.default.obj(function (file, encoding, cb) {
+                                                                console.log(file);
+                                                                // console.log(file.path)
+                                                                this.push(file);
+                                                                cb();
+                                                            });
+                                                        }());
+
 
                                                         log('gulp src end');
                                                         pipes = conf.pipe;
@@ -443,18 +459,26 @@ var Kgr = function () {
 
                                                         stream.pipe((0, _gulpCached2.default)(conf.name + ':' + conf.version)).pipe(_gulp3.default.dest('' + dest)).on('end', function () {
                                                             log('end pipe...');
-                                                            resolve();
+                                                            resolve(conf);
                                                         }).on('error', function (err) {
                                                             log('error pipe... ' + err);
                                                             reject(err);
                                                         });
+                                                        _context4.next = 27;
+                                                        break;
 
-                                                    case 20:
+                                                    case 24:
+                                                        _context4.prev = 24;
+                                                        _context4.t0 = _context4['catch'](0);
+
+                                                        reject(_context4.t0);
+
+                                                    case 27:
                                                     case 'end':
                                                         return _context4.stop();
                                                 }
                                             }
-                                        }, _callee4, _this2);
+                                        }, _callee4, _this2, [[0, 24]]);
                                     }));
 
                                     return function (_x3, _x4) {
@@ -649,7 +673,7 @@ var Kgr = function () {
                             case 22:
                                 console.log('' + _chalk2.default.green.underline('success : ' + dest));
                                 _context8.next = 25;
-                                return watch();
+                                return watch(oldconf);
 
                             case 25:
                                 _context8.next = 30;

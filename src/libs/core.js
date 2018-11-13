@@ -8,6 +8,7 @@ import detect from 'detect-import-require';
 import through from 'through2';
 import globby from 'globby';
 import del from 'del';
+import Vinyl from 'vinyl';
 
 const log = debug(`${pkg.name}:core`);
 
@@ -111,54 +112,70 @@ async function tasks(processes) {
     return data;
 }
 
-function gulpCUD(replaces, tmp, dest, conf) {
-    const add = [];
-    const remove = [];
-    const repl = [];
-    replaces = _.map(replaces, (file) => {
-        file.source = !file.source ? file.source : getAbsPath(file.source, path.dirname(conf.__filename));
-        file.target = !file.target ? file.target : getAbsPath(file.target, tmp);
+function getFiles(replaces, source, dest) {
+    const files = {
+        add: [],
+        remove: [],
+        replace: [],
+    }
+    _.each(replaces, (file) => {
+        file.source = !file.source ? undefined : getAbsPath(file.source, source);
+        file.target = !file.target ? undefined : getAbsPath(file.target, dest);
         if (fs.existsSync(file.source) && !fs.existsSync(file.target)) {
-            add.push(file);
+            files.add.push(file);
         }
         if (!fs.existsSync(file.source) && fs.existsSync(file.target)) {
-            remove.push(file);
+            files.remove.push(file);
         }
         if (fs.existsSync(file.source) && fs.existsSync(file.target)) {
-            repl.push(file);
+            files.replace.push(file);
         }
         return file
     });
+    return files;
+}
 
+function gulpCUD(files, source, dest) {
     let stream = through.obj(function (file, enc, cb) {
         const _path = file.path;
-        const find = _.find(replaces, (_file) => {
+        const rmfind = _.find(files.remove, (_file) => {
             return _file.target === _path
         })
-        let has = true;
-        if (find.source) {
-            file.contents = fs.readFile();
-        } else {
-            try {
-                del.sync(path.resolve(dest, relative))
-            } catch (e) {
-                console.log(e)
-            }
-            has = false
+        if (rmfind) {
+            cb()
+            return
         }
-        if (file.relative) {
-
-        }
-        // 确保文件进入下一个 gulp 插件
-        if (has) {
-
+        const find = _.find(files.replace, (_file) => {
+            return _file.target === _path
+        });
+        if (find) {
+            const content = fs.readFileSync(find.source);
+            file.contents = content
         }
         this.push(file);
-        // 告诉 stream 引擎，我们已经处理完了这个文件
         cb();
     });
-
+    _.each(files.remove, (remove) => {
+        const _path = path.resolve(dest, path.relative(source, remove.target));
+        del.sync(_path);
+    });
+    _.each(files.add, (add) => {
+        const content = fs.readFileSync(add.source);
+        stream.push(new Vinyl({
+            cwd: source,
+            base: source,
+            path: `${add.target}`,
+            contents: content
+        }));
+    });
     return stream;
 }
 
-export {getAbsPath, runShell, tasks, findDependen, gulpCUD};
+export {
+    getAbsPath,
+    runShell,
+    tasks,
+    findDependen,
+    gulpCUD,
+    getFiles
+};

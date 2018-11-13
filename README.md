@@ -118,3 +118,4 @@ module.exports = function () {
 1. 请确保有`git`仓库的clone 权限
 2. 避免加入大文件 `replace` , 可使用golb 忽略
 3. `pipe`使用方法, 请参考 [`gulp-replace`](https://www.npmjs.com/package/gulp-replace) , 参数以数组方式传入
+4. 请确保运行环境 存在 `git` , `tar` 命令

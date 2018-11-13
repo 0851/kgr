@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.gulpCUD = exports.findDependen = exports.tasks = exports.runShell = exports.getAbsPath = undefined;
+exports.getFiles = exports.gulpCUD = exports.findDependen = exports.tasks = exports.runShell = exports.getAbsPath = undefined;
 
 var _extends2 = require('babel-runtime/helpers/extends');
 
@@ -24,6 +24,10 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 var _find2 = require('lodash/find');
 
 var _find3 = _interopRequireDefault(_find2);
+
+var _each2 = require('lodash/each');
+
+var _each3 = _interopRequireDefault(_each2);
 
 var _isFunction2 = require('lodash/isFunction');
 
@@ -136,6 +140,10 @@ var _globby2 = _interopRequireDefault(_globby);
 var _del = require('del');
 
 var _del2 = _interopRequireDefault(_del);
+
+var _vinyl = require('vinyl');
+
+var _vinyl2 = _interopRequireDefault(_vinyl);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -252,49 +260,62 @@ function runShell(cmd) {
     });
 }
 
-function gulpCUD(replaces, tmp, dest, conf) {
-    var add = [];
-    var remove = [];
-    var repl = [];
-    replaces = (0, _map3.default)(replaces, function (file) {
-        file.source = !file.source ? file.source : getAbsPath(file.source, _path3.default.dirname(conf.__filename));
-        file.target = !file.target ? file.target : getAbsPath(file.target, tmp);
+function getFiles(replaces, source, dest) {
+    var files = {
+        add: [],
+        remove: [],
+        replace: []
+    };
+    (0, _each3.default)(replaces, function (file) {
+        file.source = !file.source ? undefined : getAbsPath(file.source, source);
+        file.target = !file.target ? undefined : getAbsPath(file.target, dest);
         if (_fs2.default.existsSync(file.source) && !_fs2.default.existsSync(file.target)) {
-            add.push(file);
+            files.add.push(file);
         }
         if (!_fs2.default.existsSync(file.source) && _fs2.default.existsSync(file.target)) {
-            remove.push(file);
+            files.remove.push(file);
         }
         if (_fs2.default.existsSync(file.source) && _fs2.default.existsSync(file.target)) {
-            repl.push(file);
+            files.replace.push(file);
         }
         return file;
     });
+    return files;
+}
 
+function gulpCUD(files, source, dest) {
     var stream = _through2.default.obj(function (file, enc, cb) {
         var _path = file.path;
-        var find = (0, _find3.default)(replaces, function (_file) {
+        var rmfind = (0, _find3.default)(files.remove, function (_file) {
             return _file.target === _path;
         });
-        var has = true;
-        if (find.source) {
-            file.contents = _fs2.default.readFile();
-        } else {
-            try {
-                _del2.default.sync(_path3.default.resolve(dest, relative));
-            } catch (e) {
-                console.log(e);
-            }
-            has = false;
+        if (rmfind) {
+            cb();
+            return;
         }
-        if (file.relative) {}
-        // 确保文件进入下一个 gulp 插件
-        if (has) {}
+        var find = (0, _find3.default)(files.replace, function (_file) {
+            return _file.target === _path;
+        });
+        if (find) {
+            var content = _fs2.default.readFileSync(find.source);
+            file.contents = content;
+        }
         this.push(file);
-        // 告诉 stream 引擎，我们已经处理完了这个文件
         cb();
     });
-
+    (0, _each3.default)(files.remove, function (remove) {
+        var _path = _path3.default.resolve(dest, _path3.default.relative(source, remove.target));
+        _del2.default.sync(_path);
+    });
+    (0, _each3.default)(files.add, function (add) {
+        var content = _fs2.default.readFileSync(add.source);
+        stream.push(new _vinyl2.default({
+            cwd: source,
+            base: source,
+            path: '' + add.target,
+            contents: content
+        }));
+    });
     return stream;
 }
 
@@ -303,3 +324,4 @@ exports.runShell = runShell;
 exports.tasks = tasks;
 exports.findDependen = findDependen;
 exports.gulpCUD = gulpCUD;
+exports.getFiles = getFiles;

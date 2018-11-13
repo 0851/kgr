@@ -11,8 +11,10 @@ import gulpCached from 'gulp-cached';
 import through from 'through2';
 import crypto from 'crypto';
 import {readConfig} from './libs/parse-config';
-import {getAbsPath, tasks, runShell, findDependen, gulpCUD} from './libs/core';
+import {getAbsPath, tasks, runShell, findDependen, gulpCUD, getFiles} from './libs/core';
 import pkg from '../package.json';
+import Vinyl from 'vinyl';
+
 import pify from 'pify';
 
 const log = debug(pkg.name);
@@ -144,71 +146,87 @@ class Kgr {
 
     async gulp(name) {
         return new Promise(async (resolve, reject) => {
-            const conf = await this.configForName(name);
-            console.log(`${chalk.green(`run pipe task...`)}`);
-            let tmp = this.sourcePath(conf);
-            let dest = this.destPath(conf);
+            try {
+                const conf = await this.configForName(name);
+                console.log(`${chalk.green(`run pipe task...`)}`);
+                let tmp = this.sourcePath(conf);
+                let dest = this.destPath(conf);
 
-            let glob = [
-                `./**/*`,
-                '!./{bower_components,node_modules,dist,build}{,/**}',
-                `!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}`
-            ];
+                let glob = [
+                    `./**/*`,
+                    '!./{bower_components,node_modules,dist,build}{,/**}',
+                    `!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}`
+                ];
 
-            if (conf.glob) {
-                conf.glob = _.isArray(conf.glob) ? conf.glob : [conf.glob];
-                glob = glob.concat(conf.glob);
-            }
+                if (conf.glob) {
+                    conf.glob = _.isArray(conf.glob) ? conf.glob : [conf.glob];
+                    glob = glob.concat(conf.glob);
+                }
 
-            log(`find glob ---> start`);
-            const opt = {base: tmp, cwd: tmp, nodir: true}
-            glob = globby.sync(glob, opt);
+                log(`find glob ---> start`);
+                const opt = {base: tmp, cwd: tmp, nodir: true}
+                glob = globby.sync(glob, opt);
 
-            log(`find glob ---> end`);
-            log(`${glob.join('\\n')}`);
+                log(`find glob ---> end`);
+                log(`${glob.join('\\n')}`);
 
-            log(`gulp src start`);
+                log(`gulp src start`);
 
-            let stream = gulp
-                .src(glob, opt)
-            // .pipe(gulpCUD(conf.replace, tmp, dest, conf));
-            log(`gulp src end`);
-            let pipes = conf.pipe;
-            if (!_.isArray(pipes)) {
-                pipes = [pipes];
-            }
+                //得到需要处理的文件
+                const files = getFiles(conf.replace, path.dirname(conf.__filename), tmp);
+                let stream = gulp
+                    .src(glob, opt)
+                    //对流进行预先处理 , 追加文件,替换文件,删除文件,等
+                    .pipe(gulpCUD(files, tmp, dest))
+                    .pipe((() => {
+                        return through.obj(function (file, encoding, cb) {
+                            console.log(file);
+                            // console.log(file.path)
+                            this.push(file)
+                            cb();
+                        })
+                    })())
 
-            stream = _.reduce(
-                pipes,
-                (stream, pipe) => {
-                    if (!_.isArray(pipe)) {
+                log(`gulp src end`);
+                let pipes = conf.pipe;
+                if (!_.isArray(pipes)) {
+                    pipes = [pipes];
+                }
+
+                stream = _.reduce(
+                    pipes,
+                    (stream, pipe) => {
+                        if (!_.isArray(pipe)) {
+                            return stream;
+                        }
+                        const reg = pipe[0];
+                        const replacement = pipe[1];
+                        const options = pipe[2];
+                        if (
+                            (_.isString(reg) || _.isRegExp(reg)) &&
+                            (_.isFunction(replacement) || _.isString(replacement))
+                        ) {
+                            stream = stream.pipe(gulpReplace(reg, replacement, options));
+                        }
                         return stream;
-                    }
-                    const reg = pipe[0];
-                    const replacement = pipe[1];
-                    const options = pipe[2];
-                    if (
-                        (_.isString(reg) || _.isRegExp(reg)) &&
-                        (_.isFunction(replacement) || _.isString(replacement))
-                    ) {
-                        stream = stream.pipe(gulpReplace(reg, replacement, options));
-                    }
-                    return stream;
-                },
-                stream
-            );
+                    },
+                    stream
+                );
 
-            stream
-                .pipe(gulpCached(`${conf.name}:${conf.version}`))
-                .pipe(gulp.dest(`${dest}`))
-                .on('end', () => {
-                    log('end pipe...');
-                    resolve();
-                })
-                .on('error', function (err) {
-                    log(`error pipe... ${err}`);
-                    reject(err);
-                });
+                stream
+                    .pipe(gulpCached(`${conf.name}:${conf.version}`))
+                    .pipe(gulp.dest(`${dest}`))
+                    .on('end', () => {
+                        log('end pipe...');
+                        resolve(conf);
+                    })
+                    .on('error', function (err) {
+                        log(`error pipe... ${err}`);
+                        reject(err);
+                    });
+            } catch (e) {
+                reject(e);
+            }
         })
     }
 
@@ -263,7 +281,7 @@ class Kgr {
                 }
             }
             console.log(`${chalk.green.underline(`success : ${dest}`)}`);
-            await watch();
+            await watch(oldconf);
         } catch (e) {
             throw e
         }
