@@ -32,10 +32,6 @@ var _createClass2 = require('babel-runtime/helpers/createClass');
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _each2 = require('lodash/each');
-
-var _each3 = _interopRequireDefault(_each2);
-
 var _isFunction2 = require('lodash/isFunction');
 
 var _isFunction3 = _interopRequireDefault(_isFunction2);
@@ -51,6 +47,14 @@ var _isString3 = _interopRequireDefault(_isString2);
 var _reduce2 = require('lodash/reduce');
 
 var _reduce3 = _interopRequireDefault(_reduce2);
+
+var _each2 = require('lodash/each');
+
+var _each3 = _interopRequireDefault(_each2);
+
+var _keyBy2 = require('lodash/keyBy');
+
+var _keyBy3 = _interopRequireDefault(_keyBy2);
 
 var _isArray2 = require('lodash/isArray');
 
@@ -115,6 +119,10 @@ var _package2 = _interopRequireDefault(_package);
 var _vinyl = require('vinyl');
 
 var _vinyl2 = _interopRequireDefault(_vinyl);
+
+var _del = require('del');
+
+var _del2 = _interopRequireDefault(_del);
 
 var _pify = require('pify');
 
@@ -390,7 +398,7 @@ var Kgr = function () {
                             case 0:
                                 return _context5.abrupt('return', new _promise2.default(function () {
                                     var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(resolve, reject) {
-                                        var conf, tmp, dest, glob, opt, files, stream, pipes;
+                                        var conf, tmp, dest, glob, opt, clean, matched, files, sourceFiles, stream, pipes;
                                         return _regenerator2.default.wrap(function _callee4$(_context4) {
                                             while (1) {
                                                 switch (_context4.prev = _context4.next) {
@@ -416,34 +424,55 @@ var Kgr = function () {
                                                         log('find glob ---> start');
                                                         opt = { base: tmp, cwd: tmp, nodir: true };
 
-                                                        glob = _globby2.default.sync(glob, opt);
 
                                                         log('find glob ---> end');
-                                                        log('' + glob.join('\\n'));
+                                                        log('' + glob.join('\n'));
+                                                        log('gulp matched start');
 
-                                                        log('gulp src start');
+                                                        clean = function clean(exists, cleanFiles) {
+                                                            var existMap = (0, _keyBy3.default)(exists, function (exist) {
+                                                                var key = _path2.default.resolve(dest, exist);
+                                                                return key;
+                                                            });
+                                                            (0, _each3.default)(cleanFiles, function (file) {
+                                                                file = _path2.default.resolve(dest, file);
+                                                                if (!existMap[file]) {
+                                                                    _del2.default.sync(file);
+                                                                }
+                                                            });
+                                                        };
 
+                                                        matched = _globby2.default.sync(glob, opt);
+
+                                                        log('gulp matched end');
                                                         //得到需要处理的文件
                                                         files = (0, _core.getFiles)(conf.replace, _path2.default.dirname(conf.__filename), tmp);
-                                                        stream = _gulp3.default.src(glob, opt)
+                                                        sourceFiles = [];
+                                                        stream = _gulp3.default.src(matched, opt);
+
+
+                                                        log('gulp file replace start');
                                                         //对流进行预先处理 , 追加文件,替换文件,删除文件,等
-                                                        .pipe((0, _core.gulpCUD)(files, tmp, dest)).pipe(function () {
+                                                        stream = stream.pipe((0, _core.gulpCUD)(files, tmp, dest));
+                                                        log('gulp file replace end');
+
+                                                        log('gulp record start');
+                                                        stream = stream.pipe(function () {
                                                             return _through2.default.obj(function (file, encoding, cb) {
-                                                                console.log(file);
-                                                                // console.log(file.path)
+                                                                sourceFiles.push(file.relative);
                                                                 this.push(file);
                                                                 cb();
                                                             });
                                                         }());
+                                                        log('gulp record end');
 
-
-                                                        log('gulp src end');
                                                         pipes = conf.pipe;
 
                                                         if (!(0, _isArray3.default)(pipes)) {
                                                             pipes = [pipes];
                                                         }
 
+                                                        log('gulp content replace start');
                                                         stream = (0, _reduce3.default)(pipes, function (stream, pipe) {
                                                             if (!(0, _isArray3.default)(pipe)) {
                                                                 return stream;
@@ -456,29 +485,33 @@ var Kgr = function () {
                                                             }
                                                             return stream;
                                                         }, stream);
-
+                                                        log('gulp content replace end');
                                                         stream.pipe((0, _gulpCached2.default)(conf.name + ':' + conf.version)).pipe(_gulp3.default.dest('' + dest)).on('end', function () {
+                                                            log('clean start');
+                                                            var cleanFiles = _globby2.default.sync(glob, { base: dest, cwd: dest, nodir: true });
+                                                            clean(sourceFiles, cleanFiles);
+                                                            log('clean end');
                                                             log('end pipe...');
                                                             resolve(conf);
                                                         }).on('error', function (err) {
                                                             log('error pipe... ' + err);
                                                             reject(err);
                                                         });
-                                                        _context4.next = 27;
+                                                        _context4.next = 37;
                                                         break;
 
-                                                    case 24:
-                                                        _context4.prev = 24;
+                                                    case 34:
+                                                        _context4.prev = 34;
                                                         _context4.t0 = _context4['catch'](0);
 
                                                         reject(_context4.t0);
 
-                                                    case 27:
+                                                    case 37:
                                                     case 'end':
                                                         return _context4.stop();
                                                 }
                                             }
-                                        }, _callee4, _this2, [[0, 24]]);
+                                        }, _callee4, _this2, [[0, 34]]);
                                     }));
 
                                     return function (_x3, _x4) {
@@ -537,6 +570,7 @@ var Kgr = function () {
                                                                 files.push(file.source);
                                                             }
                                                         });
+                                                        log('watch start ... , ' + files);
                                                         _gulp3.default.watch(files, function () {
                                                             var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(event) {
                                                                 var _conf, dest, shell;
@@ -615,7 +649,7 @@ var Kgr = function () {
                                                             };
                                                         }());
 
-                                                    case 8:
+                                                    case 9:
                                                     case 'end':
                                                         return _context7.stop();
                                                 }
@@ -648,34 +682,34 @@ var Kgr = function () {
                                 throw new Error('can fount dest path ' + dest);
 
                             case 11:
+                                _context8.next = 13;
+                                return watch();
+
+                            case 13:
                                 if (!conf.start) {
-                                    _context8.next = 22;
+                                    _context8.next = 24;
                                     break;
                                 }
 
-                                _context8.prev = 12;
-                                _context8.next = 15;
+                                _context8.prev = 14;
+                                _context8.next = 17;
                                 return (0, _core.runShell)(conf.start, { cwd: dest });
 
-                            case 15:
+                            case 17:
                                 shell = _context8.sent;
 
                                 bash = shell[2];
-                                _context8.next = 22;
+                                _context8.next = 24;
                                 break;
 
-                            case 19:
-                                _context8.prev = 19;
-                                _context8.t0 = _context8['catch'](12);
+                            case 21:
+                                _context8.prev = 21;
+                                _context8.t0 = _context8['catch'](14);
 
                                 console.error(_context8.t0);
 
-                            case 22:
+                            case 24:
                                 console.log('' + _chalk2.default.green.underline('success : ' + dest));
-                                _context8.next = 25;
-                                return watch(oldconf);
-
-                            case 25:
                                 _context8.next = 30;
                                 break;
 
@@ -689,7 +723,7 @@ var Kgr = function () {
                                 return _context8.stop();
                         }
                     }
-                }, _callee8, this, [[2, 27], [12, 19]]);
+                }, _callee8, this, [[2, 27], [14, 21]]);
             }));
 
             function devServer(_x5) {
@@ -813,30 +847,50 @@ var Kgr = function () {
                                                     return _context13.abrupt('return');
 
                                                 case 9:
-                                                    if (!_fs2.default.existsSync(args.output)) {
-                                                        _context13.next = 14;
+                                                    if (!conf.build) {
+                                                        _context13.next = 18;
                                                         break;
                                                     }
 
-                                                    _context13.next = 12;
-                                                    return (0, _core.runShell)('cd ' + args.output + ' && tar -zcf ' + conf.name + '.' + conf.version + '.tar.gz -C ' + dest + ' .');
+                                                    _context13.prev = 10;
+                                                    _context13.next = 13;
+                                                    return (0, _core.runShell)(conf.build, { cwd: dest });
 
-                                                case 12:
-                                                    _context13.next = 15;
+                                                case 13:
+                                                    _context13.next = 18;
                                                     break;
 
-                                                case 14:
+                                                case 15:
+                                                    _context13.prev = 15;
+                                                    _context13.t0 = _context13['catch'](10);
+
+                                                    console.error(_context13.t0);
+
+                                                case 18:
+                                                    if (!_fs2.default.existsSync(args.output)) {
+                                                        _context13.next = 23;
+                                                        break;
+                                                    }
+
+                                                    _context13.next = 21;
+                                                    return (0, _core.runShell)('cd ' + args.output + ' && tar -zcf ' + conf.name + '.' + conf.version + '.tar.gz -C ' + dest + ' .');
+
+                                                case 21:
+                                                    _context13.next = 24;
+                                                    break;
+
+                                                case 23:
                                                     console.log('' + _chalk2.default.yellow('warning : args.output \u4E0D\u5B58\u5728'));
 
-                                                case 15:
+                                                case 24:
                                                     console.log('' + _chalk2.default.green.underline('success : ' + dest));
 
-                                                case 16:
+                                                case 25:
                                                 case 'end':
                                                     return _context13.stop();
                                             }
                                         }
-                                    }, _callee13, _this5);
+                                    }, _callee13, _this5, [[10, 15]]);
                                 }))]);
 
                             case 2:

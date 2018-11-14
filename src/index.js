@@ -14,6 +14,7 @@ import {readConfig} from './libs/parse-config';
 import {getAbsPath, tasks, runShell, findDependen, gulpCUD, getFiles} from './libs/core';
 import pkg from '../package.json';
 import Vinyl from 'vinyl';
+import del from 'del';
 
 import pify from 'pify';
 
@@ -165,34 +166,53 @@ class Kgr {
 
                 log(`find glob ---> start`);
                 const opt = {base: tmp, cwd: tmp, nodir: true}
-                glob = globby.sync(glob, opt);
 
                 log(`find glob ---> end`);
-                log(`${glob.join('\\n')}`);
+                log(`${glob.join('\n')}`);
+                log(`gulp matched start`);
+                const clean = (exists, cleanFiles) => {
+                    const existMap = _.keyBy(exists, function (exist) {
+                        const key = path.resolve(dest, exist)
+                        return key;
+                    });
+                    _.each(cleanFiles, (file) => {
+                        file = path.resolve(dest, file)
+                        if (!existMap[file]) {
+                            del.sync(file);
+                        }
+                    })
+                }
 
-                log(`gulp src start`);
-
+                const matched = globby.sync(glob, opt);
+                log(`gulp matched end`);
                 //得到需要处理的文件
                 const files = getFiles(conf.replace, path.dirname(conf.__filename), tmp);
+                let sourceFiles = []
                 let stream = gulp
-                    .src(glob, opt)
-                    //对流进行预先处理 , 追加文件,替换文件,删除文件,等
-                    .pipe(gulpCUD(files, tmp, dest))
-                    .pipe((() => {
-                        return through.obj(function (file, encoding, cb) {
-                            console.log(file);
-                            // console.log(file.path)
-                            this.push(file)
-                            cb();
-                        })
-                    })())
+                    .src(matched, opt)
 
-                log(`gulp src end`);
+                log(`gulp file replace start`);
+                //对流进行预先处理 , 追加文件,替换文件,删除文件,等
+                stream = stream.pipe(gulpCUD(files, tmp, dest))
+                log(`gulp file replace end`);
+
+                log(`gulp record start`);
+                stream = stream.pipe((() => {
+                    return through.obj(function (file, encoding, cb) {
+                        sourceFiles.push(file.relative)
+                        this.push(file)
+                        cb();
+                    })
+                })())
+                log(`gulp record end`);
+
                 let pipes = conf.pipe;
                 if (!_.isArray(pipes)) {
                     pipes = [pipes];
                 }
 
+
+                log(`gulp content replace start`);
                 stream = _.reduce(
                     pipes,
                     (stream, pipe) => {
@@ -212,11 +232,15 @@ class Kgr {
                     },
                     stream
                 );
-
+                log(`gulp content replace end`);
                 stream
                     .pipe(gulpCached(`${conf.name}:${conf.version}`))
                     .pipe(gulp.dest(`${dest}`))
-                    .on('end', () => {
+                    .on('end', function () {
+                        log(`clean start`)
+                        const cleanFiles = globby.sync(glob, {base: dest, cwd: dest, nodir: true});
+                        clean(sourceFiles, cleanFiles);
+                        log(`clean end`)
                         log('end pipe...');
                         resolve(conf);
                     })
@@ -241,6 +265,7 @@ class Kgr {
                     files.push(file.source);
                 }
             });
+            log(`watch start ... , ${files}`)
             gulp.watch(files, async (event) => {
                 console.log(`${chalk.yellow(`File ${event.path} was ${event.type} , running tasks...`)}`);
                 try {
@@ -272,6 +297,7 @@ class Kgr {
             if (!fs.existsSync(dest)) {
                 throw new Error(`can fount dest path ${dest}`);
             }
+            await watch();
             if (conf.start) {
                 try {
                     let shell = await runShell(conf.start, {cwd: dest});
@@ -281,7 +307,6 @@ class Kgr {
                 }
             }
             console.log(`${chalk.green.underline(`success : ${dest}`)}`);
-            await watch(oldconf);
         } catch (e) {
             throw e
         }
@@ -309,6 +334,13 @@ class Kgr {
                 const conf = await this.configForName(name);
                 let dest = this.destPath(conf);
                 if (!fs.existsSync(dest)) return;
+                if (conf.build) {
+                    try {
+                        await runShell(conf.build, {cwd: dest});
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
                 if (fs.existsSync(args.output)) {
                     await runShell(
                         `cd ${args.output} && tar -zcf ${conf.name}.${conf.version}.tar.gz -C ${dest} .`

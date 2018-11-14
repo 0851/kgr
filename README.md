@@ -52,6 +52,7 @@ module.exports = function () {
          * [replace] <array[<object>[source,target]]> 选填
          * [start] <string> 选填 启动命令
          * [restart] <string> 选填 更改文件后触发重启命令
+         * [build] <string> 选填 构建命令
          */
 
         {
@@ -63,6 +64,8 @@ module.exports = function () {
             start: 'ls',
             //文件改变后命令 , 空代表改变文件后不触发操作 , mode dev 时执行
             restart: 'ls -l',
+            //构建命令 ,mode build时执行
+            build:'',
             //git 地址
             remote: 'http://xxxx/xxxx/xxx.git',
             //分支
