@@ -11,7 +11,7 @@ import gulpCached from 'gulp-cached';
 import through from 'through2';
 import crypto from 'crypto';
 import {readConfig} from './libs/parse-config';
-import {getAbsPath, tasks, runShell, findDependen, gulpCUD, getFiles} from './libs/core';
+import {getAbsPath, tasks, runShell, findDependen, gulpCUD, getFiles, getExistsReplace} from './libs/core';
 import pkg from '../package.json';
 import Vinyl from 'vinyl';
 import del from 'del';
@@ -152,24 +152,31 @@ class Kgr {
                 console.log(`${chalk.green(`run pipe task...`)}`);
                 let tmp = this.sourcePath(conf);
                 let dest = this.destPath(conf);
-
+                const opt = {base: tmp, cwd: tmp}
                 let glob = [
                     `./**/*`,
                     '!./{bower_components,node_modules,dist,build}{,/**}',
                     `!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}`
                 ];
 
+                let removefiles = []
+                if (conf.remove) {
+                    //删除dest内文件
+                    del.sync(conf.remove, {base: dest, cwd: dest})
+                    //过滤掉源 , 避免再次push到dest中
+                    removefiles = globby.sync(conf.remove, opt).map((file) => {
+                        return `!${file}`
+                    })
+                    glob = glob.concat(removefiles)
+                }
                 if (conf.glob) {
                     conf.glob = _.isArray(conf.glob) ? conf.glob : [conf.glob];
                     glob = glob.concat(conf.glob);
                 }
 
-                log(`find glob ---> start`);
-                const opt = {base: tmp, cwd: tmp, nodir: true}
-
-                log(`find glob ---> end`);
-                log(`${glob.join('\n')}`);
                 log(`gulp matched start`);
+                log(`${glob.join('\n')}`);
+
                 const clean = (exists, cleanFiles) => {
                     const existMap = _.keyBy(exists, function (exist) {
                         const key = path.resolve(dest, exist)
@@ -186,14 +193,14 @@ class Kgr {
                 const matched = globby.sync(glob, opt);
                 log(`gulp matched end`);
                 //得到需要处理的文件
-                const files = getFiles(conf.replace, path.dirname(conf.__filename), tmp);
+                const files = getFiles(conf.replace, path.dirname(conf.__filename), dest);
                 let sourceFiles = []
                 let stream = gulp
                     .src(matched, opt)
 
                 log(`gulp file replace start`);
                 //对流进行预先处理 , 追加文件,替换文件,删除文件,等
-                stream = stream.pipe(gulpCUD(files, tmp, dest))
+                stream = stream.pipe(gulpCUD(files, tmp))
                 log(`gulp file replace end`);
 
                 log(`gulp record start`);
@@ -258,13 +265,8 @@ class Kgr {
         let bash = null;
         const watch = async () => {
             const conf = await this.configForName(name);
-            const files = await findDependen(conf.__filename);
-            _.each(conf.replace, (file) => {
-                file.source = !file.source ? file.source : getAbsPath(file.source, path.dirname(conf.__filename));
-                if (fs.existsSync(file.source)) {
-                    files.push(file.source);
-                }
-            });
+            let files = await findDependen(conf.__filename);
+            files = files.concat(getExistsReplace(conf.replace, path.dirname(conf.__filename)));
             log(`watch start ... , ${files}`)
             gulp.watch(files, async (event) => {
                 console.log(`${chalk.yellow(`File ${event.path} was ${event.type} , running tasks...`)}`);

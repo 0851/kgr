@@ -112,42 +112,54 @@ async function tasks(processes) {
     return data;
 }
 
-function getFiles(replaces, source, dest) {
-    const files = {
-        add: [],
-        remove: [],
-        replace: [],
-    }
-    _.each(replaces, (file) => {
-        file.source = !file.source ? undefined : getAbsPath(file.source, source);
-        file.target = !file.target ? undefined : getAbsPath(file.target, dest);
-        if (fs.existsSync(file.source) && !fs.existsSync(file.target)) {
-            files.add.push(file);
+function getExistsReplace(replaces, source) {
+    const files = []
+    _.each(replaces, (value, key) => {
+        if (!_.isString(value) || !_.isString(key)) {
+            return
         }
-        if (!fs.existsSync(file.source) && fs.existsSync(file.target)) {
-            files.remove.push(file);
+        value = !value ? value : getAbsPath(value, source);
+        if (value && fs.existsSync(value)) {
+            files.push(value);
         }
-        if (fs.existsSync(file.source) && fs.existsSync(file.target)) {
-            files.replace.push(file);
-        }
-        return file
     });
     return files;
 }
 
-function gulpCUD(files, source, dest) {
-    let stream = through.obj(function (file, enc, cb) {
-        const _path = file.path;
-        const rmfind = _.find(files.remove, (_file) => {
-            return _file.target === _path
-        })
-        if (rmfind) {
-            cb()
+function getFiles(replaces, source, dest) {
+    const files = {
+        add: [],
+        replace: [],
+    }
+    _.forEach(replaces, (value, key) => {
+        if (!_.isString(value) || !_.isString(key)) {
             return
         }
+        let source = !value ? undefined : getAbsPath(value, source);
+        let target = !key ? undefined : getAbsPath(key, dest);
+        if (fs.existsSync(source) && !fs.existsSync(target)) {
+            files.add.push({
+                source,
+                target
+            });
+        }
+        if (fs.existsSync(source) && fs.existsSync(target)) {
+            files.replace.push({
+                source,
+                target
+            });
+        }
+    });
+    return files;
+}
+
+function gulpCUD(files, source) {
+    let stream = through.obj(function (file, enc, cb) {
+        const _path = file.path;
         const find = _.find(files.replace, (_file) => {
             return _file.target === _path
         });
+        log(`find replace file ${find} ${_path}`)
         if (find) {
             const content = fs.readFileSync(find.source);
             file.contents = content
@@ -155,10 +167,8 @@ function gulpCUD(files, source, dest) {
         this.push(file);
         cb();
     });
-    _.each(files.remove, (remove) => {
-        const _path = path.resolve(dest, path.relative(source, remove.target));
-        del.sync(_path);
-    });
+    log(`add files ${JSON.stringify(files.add)}`)
+    log(`replace files ${JSON.stringify(files.replace)}`)
     _.each(files.add, (add) => {
         const content = fs.readFileSync(add.source);
         stream.push(new Vinyl({
@@ -177,5 +187,6 @@ export {
     tasks,
     findDependen,
     gulpCUD,
-    getFiles
+    getFiles,
+    getExistsReplace
 };

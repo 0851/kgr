@@ -398,7 +398,7 @@ var Kgr = function () {
                             case 0:
                                 return _context5.abrupt('return', new _promise2.default(function () {
                                     var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(resolve, reject) {
-                                        var conf, tmp, dest, glob, opt, clean, matched, files, sourceFiles, stream, pipes;
+                                        var conf, tmp, dest, opt, glob, removefiles, clean, matched, files, sourceFiles, stream, pipes;
                                         return _regenerator2.default.wrap(function _callee4$(_context4) {
                                             while (1) {
                                                 switch (_context4.prev = _context4.next) {
@@ -413,21 +413,26 @@ var Kgr = function () {
                                                         console.log('' + _chalk2.default.green('run pipe task...'));
                                                         tmp = _this2.sourcePath(conf);
                                                         dest = _this2.destPath(conf);
+                                                        opt = { base: tmp, cwd: tmp };
                                                         glob = ['./**/*', '!./{bower_components,node_modules,dist,build}{,/**}', '!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'];
+                                                        removefiles = [];
 
-
+                                                        if (conf.remove) {
+                                                            //删除dest内文件
+                                                            _del2.default.sync(conf.remove, { base: dest, cwd: dest });
+                                                            //过滤掉源 , 避免再次push到dest中
+                                                            removefiles = _globby2.default.sync(conf.remove, opt).map(function (file) {
+                                                                return '!' + file;
+                                                            });
+                                                            glob = glob.concat(removefiles);
+                                                        }
                                                         if (conf.glob) {
                                                             conf.glob = (0, _isArray3.default)(conf.glob) ? conf.glob : [conf.glob];
                                                             glob = glob.concat(conf.glob);
                                                         }
 
-                                                        log('find glob ---> start');
-                                                        opt = { base: tmp, cwd: tmp, nodir: true };
-
-
-                                                        log('find glob ---> end');
-                                                        log('' + glob.join('\n'));
                                                         log('gulp matched start');
+                                                        log('' + glob.join('\n'));
 
                                                         clean = function clean(exists, cleanFiles) {
                                                             var existMap = (0, _keyBy3.default)(exists, function (exist) {
@@ -446,14 +451,14 @@ var Kgr = function () {
 
                                                         log('gulp matched end');
                                                         //得到需要处理的文件
-                                                        files = (0, _core.getFiles)(conf.replace, _path2.default.dirname(conf.__filename), tmp);
+                                                        files = (0, _core.getFiles)(conf.replace, _path2.default.dirname(conf.__filename), dest);
                                                         sourceFiles = [];
                                                         stream = _gulp3.default.src(matched, opt);
 
 
                                                         log('gulp file replace start');
                                                         //对流进行预先处理 , 追加文件,替换文件,删除文件,等
-                                                        stream = stream.pipe((0, _core.gulpCUD)(files, tmp, dest));
+                                                        stream = stream.pipe((0, _core.gulpCUD)(files, tmp));
                                                         log('gulp file replace end');
 
                                                         log('gulp record start');
@@ -564,12 +569,7 @@ var Kgr = function () {
                                                     case 5:
                                                         files = _context7.sent;
 
-                                                        (0, _each3.default)(conf.replace, function (file) {
-                                                            file.source = !file.source ? file.source : (0, _core.getAbsPath)(file.source, _path2.default.dirname(conf.__filename));
-                                                            if (_fs2.default.existsSync(file.source)) {
-                                                                files.push(file.source);
-                                                            }
-                                                        });
+                                                        files = files.concat((0, _core.getExistsReplace)(conf.replace, _path2.default.dirname(conf.__filename)));
                                                         log('watch start ... , ' + files);
                                                         _gulp3.default.watch(files, function () {
                                                             var _ref10 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(event) {
