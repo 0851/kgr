@@ -11,7 +11,7 @@ import gulpCached from 'gulp-cached';
 import through from 'through2';
 import crypto from 'crypto';
 import {readConfig} from './libs/parse-config';
-import {getAbsPath, tasks, runShell, findDependen, gulpCUD, getFiles, getExistsReplace} from './libs/core';
+import {getAbsPath, tasks, runShell, findDependen, gulpCUD, getFiles, getExistsReplace, clean} from './libs/core';
 import pkg from '../package.json';
 import Vinyl from 'vinyl';
 import del from 'del';
@@ -148,76 +148,66 @@ class Kgr {
     async gulp(name) {
         return new Promise(async (resolve, reject) => {
             try {
+                const self = this;
                 const conf = await this.configForName(name);
                 console.log(`${chalk.green(`run pipe task...`)}`);
                 let tmp = this.sourcePath(conf);
                 let dest = this.destPath(conf);
                 const opt = {base: tmp, cwd: tmp}
                 let glob = [
-                    `./**/*`,
-                    '!./{bower_components,node_modules,dist,build}{,/**}',
-                    `!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}`
+                    `./**/{*,.*}`,
+                    '!./{bower_components,node_modules,dist,build}{,/**/{*,.*}}',
+                    `!./**/{*,.*}.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}`
                 ];
 
-                let removefiles = []
-                if (conf.remove) {
-                    //删除dest内文件
-                    del.sync(conf.remove, {base: dest, cwd: dest})
-                    //过滤掉源 , 避免再次push到dest中
-                    removefiles = globby.sync(conf.remove, opt).map((file) => {
-                        return `!${file}`
-                    })
-                    glob = glob.concat(removefiles)
-                }
                 if (conf.glob) {
                     conf.glob = _.isArray(conf.glob) ? conf.glob : [conf.glob];
                     glob = glob.concat(conf.glob);
                 }
 
-                log(`gulp matched start`);
-                log(`${glob.join('\n')}`);
-
-                const clean = (exists, cleanFiles) => {
-                    const existMap = _.keyBy(exists, function (exist) {
-                        const key = path.resolve(dest, exist)
-                        return key;
+                let removeGlob = []
+                if (conf.remove) {
+                    //过滤掉源 , 避免再次push到dest中
+                    removeGlob = globby.sync(conf.remove, opt).map((file) => {
+                        console.log(chalk.underline.yellow(`file        removed   ::   ${file}`))
+                        //删除时清除缓存 , 以便下次重建
+                        delete self.cache[file]
+                        return `!${file}`
                     });
-                    _.each(cleanFiles, (file) => {
-                        file = path.resolve(dest, file)
-                        if (!existMap[file]) {
-                            del.sync(file);
-                        }
-                    })
                 }
 
-                const matched = globby.sync(glob, opt);
-                log(`gulp matched end`);
-                //得到需要处理的文件
-                const files = getFiles(conf.replace, path.dirname(conf.__filename), dest);
+                log(`gulp matched start`);
+                log(`${glob.join('\n')}`);
+                log(`gulp removeGlob start`);
+                log(`${removeGlob.join('\n')}`);
+                let matched = globby.sync(glob.concat(removeGlob), opt);
+                log(`gulp matched end ${JSON.stringify(matched)}`);
+
+                //得到需要追加或替换的文件
+                const files = getFiles(conf.replace, path.dirname(conf.__filename), matched);
+
                 let sourceFiles = []
                 let stream = gulp
                     .src(matched, opt)
-
+                // .pipe(through.obj(function (file, encoding, cb) {
+                //     let contents = file.checksum;
+                //     if (!contents && file.isBuffer()) {
+                //         contents = file.contents.toString('utf8');
+                //     }
+                //     file.__old = contents;
+                //     this.push(file);
+                //     cb();
+                // }))
                 log(`gulp file replace start`);
                 //对流进行预先处理 , 追加文件,替换文件,删除文件,等
                 stream = stream.pipe(gulpCUD(files, tmp))
                 log(`gulp file replace end`);
 
-                log(`gulp record start`);
-                stream = stream.pipe((() => {
-                    return through.obj(function (file, encoding, cb) {
-                        sourceFiles.push(file.relative)
-                        this.push(file)
-                        cb();
-                    })
-                })())
-                log(`gulp record end`);
 
                 let pipes = conf.pipe;
                 if (!_.isArray(pipes)) {
                     pipes = [pipes];
                 }
-
 
                 log(`gulp content replace start`);
                 stream = _.reduce(
@@ -240,15 +230,53 @@ class Kgr {
                     stream
                 );
                 log(`gulp content replace end`);
+                log(`gulp record start`);
+                stream = stream.pipe((() => {
+                    return through.obj(function (file, encoding, cb) {
+                        sourceFiles.push(file.relative)
+                        let contents = file.checksum;
+                        if (!contents && file.isBuffer()) {
+                            contents = file.contents.toString('utf8');
+                        }
+                        if (file.__new === true) {
+                            console.log(chalk.underline.green(`file          newed   ::   ${file.relative}`))
+                        }
+                        if (file.__changed === true) {
+                            console.log(chalk.underline.green(`file        changed   ::   ${file.relative}`))
+                        }
+                        if (!self.cache.hasOwnProperty(file.relative)) {
+                            console.log(chalk.underline.green(`content         init  ::   ${file.relative}`))
+                            this.push(file);
+                            self.cache[file.relative] = contents;
+                        }
+                        if (self.cache[file.relative] !== contents) {
+                            console.log(chalk.underline.green(`content     changed   ::   ${file.relative}`))
+                            this.push(file);
+                            self.cache[file.relative] = contents;
+                        }
+                        cb();
+                    })
+                })());
+                log(`gulp record end`);
                 stream
-                    .pipe(gulpCached(`${conf.name}:${conf.version}`))
                     .pipe(gulp.dest(`${dest}`))
                     .on('end', function () {
                         log(`clean start`)
-                        const cleanFiles = globby.sync(glob, {base: dest, cwd: dest, nodir: true});
-                        clean(sourceFiles, cleanFiles);
-                        log(`clean end`)
+                        //清理已删除或不应存在在dest目录中的文件
+                        const cleanFiles = globby.sync(glob, {base: dest, cwd: dest});
+                        log(`sourceFiles ${JSON.stringify(sourceFiles)}`);
+                        log(`cleanFiles ${JSON.stringify(cleanFiles)}`);
+                        //删除时清除缓存 , 以便下次重建
+                        const matchedClean = clean(sourceFiles, cleanFiles);
+                        _.each(matchedClean, (file) => {
+                            const _file = path.resolve(dest, file);
+                            console.log(chalk.underline.yellow(`file          clean   ::   ${file}`))
+                            del.sync(_file);
+                            delete self.cache[file];
+                        });
+                        log(`clean end`);
                         log('end pipe...');
+                        console.log(`${chalk.green(`end pipe task...`)}`);
                         resolve(conf);
                     })
                     .on('error', function (err) {
@@ -293,6 +321,7 @@ class Kgr {
             });
         }
         try {
+            this.cache = {};
             await this.gulp(name);
             const conf = await this.configForName(name);
             let dest = this.destPath(conf);
@@ -331,6 +360,7 @@ class Kgr {
                 return await this.init(name);
             },
             async () => {
+                this.cache = {};
                 await this.gulp(name);
                 const args = this.getArgs();
                 const conf = await this.configForName(name);

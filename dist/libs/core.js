@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.getExistsReplace = exports.getFiles = exports.gulpCUD = exports.findDependen = exports.tasks = exports.runShell = exports.getAbsPath = undefined;
+exports.clean = exports.getExistsReplace = exports.getFiles = exports.gulpCUD = exports.findDependen = exports.tasks = exports.runShell = exports.getAbsPath = undefined;
 
 var _stringify = require('babel-runtime/core-js/json/stringify');
 
@@ -25,9 +25,17 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
-var _find2 = require('lodash/find');
+var _filter2 = require('lodash/filter');
 
-var _find3 = _interopRequireDefault(_find2);
+var _filter3 = _interopRequireDefault(_filter2);
+
+var _keyBy2 = require('lodash/keyBy');
+
+var _keyBy3 = _interopRequireDefault(_keyBy2);
+
+var _find3 = require('lodash/find');
+
+var _find4 = _interopRequireDefault(_find3);
 
 var _forEach2 = require('lodash/forEach');
 
@@ -119,9 +127,9 @@ var tasks = function () {
     };
 }();
 
-var _path2 = require('path');
+var _path = require('path');
 
-var _path3 = _interopRequireDefault(_path2);
+var _path2 = _interopRequireDefault(_path);
 
 var _debug = require('debug');
 
@@ -157,6 +165,10 @@ var _vinyl = require('vinyl');
 
 var _vinyl2 = _interopRequireDefault(_vinyl);
 
+var _chalk = require('chalk');
+
+var _chalk2 = _interopRequireDefault(_chalk);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var log = (0, _debug2.default)(_package2.default.name + ':core');
@@ -178,8 +190,8 @@ var findDependen = function () {
 
                         _loop = function _loop() {
                             var file = files.shift();
-                            if (_path3.default.extname(file) === '') {
-                                files.push('' + _path3.default.resolve(file, 'index.js'));
+                            if (_path2.default.extname(file) === '') {
+                                files.push('' + _path2.default.resolve(file, 'index.js'));
                                 files.push(file + '.js');
                                 return 'continue';
                             }
@@ -195,7 +207,7 @@ var findDependen = function () {
 
                             result.push(file);
                             var dep = (0, _map3.default)((0, _detectImportRequire2.default)(content), function (f) {
-                                return getAbsPath(f, _path3.default.dirname(file));
+                                return getAbsPath(f, _path2.default.dirname(file));
                             });
                             files = files.concat(dep);
                         };
@@ -236,10 +248,10 @@ var findDependen = function () {
 }();
 
 function getAbsPath(output, base) {
-    var isAbs = _path3.default.isAbsolute(output);
+    var isAbs = _path2.default.isAbsolute(output);
     base = base || process.cwd();
     log('base cwd ' + base);
-    output = isAbs ? output : _path3.default.resolve(base, output);
+    output = isAbs ? output : _path2.default.resolve(base, output);
     return output;
 }
 
@@ -286,7 +298,7 @@ function getExistsReplace(replaces, source) {
     return files;
 }
 
-function getFiles(replaces, source, dest) {
+function getFiles(replaces, source, matched) {
     var files = {
         add: [],
         replace: []
@@ -296,17 +308,21 @@ function getFiles(replaces, source, dest) {
             return;
         }
         var source = !value ? undefined : getAbsPath(value, source);
-        var target = !key ? undefined : getAbsPath(key, dest);
-        if (_fs2.default.existsSync(source) && !_fs2.default.existsSync(target)) {
-            files.add.push({
-                source: source,
-                target: target
-            });
+        if (!source || !_fs2.default.existsSync(source)) {
+            return;
         }
-        if (_fs2.default.existsSync(source) && _fs2.default.existsSync(target)) {
+        var _find = (0, _find4.default)(matched, function (_match) {
+            return _match === key;
+        });
+        if (_find) {
             files.replace.push({
                 source: source,
-                target: target
+                target: key
+            });
+        } else {
+            files.add.push({
+                source: source,
+                target: key
             });
         }
     });
@@ -315,14 +331,14 @@ function getFiles(replaces, source, dest) {
 
 function gulpCUD(files, source) {
     var stream = _through2.default.obj(function (file, enc, cb) {
-        var _path = file.path;
-        var find = (0, _find3.default)(files.replace, function (_file) {
-            return _file.target === _path;
+        var _relative = file.relative;
+        var find = (0, _find4.default)(files.replace, function (_file) {
+            return _file.target === _relative;
         });
-        log('find replace file ' + find + ' ' + _path);
         if (find) {
             var content = _fs2.default.readFileSync(find.source);
             file.contents = content;
+            file.__changed = true;
         }
         this.push(file);
         cb();
@@ -331,14 +347,25 @@ function gulpCUD(files, source) {
     log('replace files ' + (0, _stringify2.default)(files.replace));
     (0, _each3.default)(files.add, function (add) {
         var content = _fs2.default.readFileSync(add.source);
-        stream.push(new _vinyl2.default({
+        var vl = new _vinyl2.default({
             cwd: source,
             base: source,
-            path: '' + add.target,
+            path: '' + _path2.default.resolve(source, add.target),
             contents: content
-        }));
+        });
+        vl.__new = true;
+        stream.push(vl);
     });
     return stream;
+}
+
+function clean(exists, cleanFiles) {
+    var existMap = (0, _keyBy3.default)(exists, function (exist) {
+        return exist;
+    });
+    return (0, _filter3.default)(cleanFiles, function (file) {
+        return !existMap[file];
+    });
 }
 
 exports.getAbsPath = getAbsPath;
@@ -348,3 +375,4 @@ exports.findDependen = findDependen;
 exports.gulpCUD = gulpCUD;
 exports.getFiles = getFiles;
 exports.getExistsReplace = getExistsReplace;
+exports.clean = clean;

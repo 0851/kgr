@@ -32,6 +32,10 @@ var _createClass2 = require('babel-runtime/helpers/createClass');
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
+var _each2 = require('lodash/each');
+
+var _each3 = _interopRequireDefault(_each2);
+
 var _isFunction2 = require('lodash/isFunction');
 
 var _isFunction3 = _interopRequireDefault(_isFunction2);
@@ -47,14 +51,6 @@ var _isString3 = _interopRequireDefault(_isString2);
 var _reduce2 = require('lodash/reduce');
 
 var _reduce3 = _interopRequireDefault(_reduce2);
-
-var _each2 = require('lodash/each');
-
-var _each3 = _interopRequireDefault(_each2);
-
-var _keyBy2 = require('lodash/keyBy');
-
-var _keyBy3 = _interopRequireDefault(_keyBy2);
 
 var _isArray2 = require('lodash/isArray');
 
@@ -398,78 +394,69 @@ var Kgr = function () {
                             case 0:
                                 return _context5.abrupt('return', new _promise2.default(function () {
                                     var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(resolve, reject) {
-                                        var conf, tmp, dest, opt, glob, removefiles, clean, matched, files, sourceFiles, stream, pipes;
+                                        var self, conf, tmp, dest, opt, glob, removeGlob, matched, files, sourceFiles, stream, pipes;
                                         return _regenerator2.default.wrap(function _callee4$(_context4) {
                                             while (1) {
                                                 switch (_context4.prev = _context4.next) {
                                                     case 0:
                                                         _context4.prev = 0;
-                                                        _context4.next = 3;
+                                                        self = _this2;
+                                                        _context4.next = 4;
                                                         return _this2.configForName(name);
 
-                                                    case 3:
+                                                    case 4:
                                                         conf = _context4.sent;
 
                                                         console.log('' + _chalk2.default.green('run pipe task...'));
                                                         tmp = _this2.sourcePath(conf);
                                                         dest = _this2.destPath(conf);
                                                         opt = { base: tmp, cwd: tmp };
-                                                        glob = ['./**/*', '!./{bower_components,node_modules,dist,build}{,/**}', '!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'];
-                                                        removefiles = [];
+                                                        glob = ['./**/{*,.*}', '!./{bower_components,node_modules,dist,build}{,/**/{*,.*}}', '!./**/{*,.*}.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'];
 
-                                                        if (conf.remove) {
-                                                            //删除dest内文件
-                                                            _del2.default.sync(conf.remove, { base: dest, cwd: dest });
-                                                            //过滤掉源 , 避免再次push到dest中
-                                                            removefiles = _globby2.default.sync(conf.remove, opt).map(function (file) {
-                                                                return '!' + file;
-                                                            });
-                                                            glob = glob.concat(removefiles);
-                                                        }
+
                                                         if (conf.glob) {
                                                             conf.glob = (0, _isArray3.default)(conf.glob) ? conf.glob : [conf.glob];
                                                             glob = glob.concat(conf.glob);
                                                         }
 
+                                                        removeGlob = [];
+
+                                                        if (conf.remove) {
+                                                            //过滤掉源 , 避免再次push到dest中
+                                                            removeGlob = _globby2.default.sync(conf.remove, opt).map(function (file) {
+                                                                console.log(_chalk2.default.underline.yellow('file        removed   ::   ' + file));
+                                                                //删除时清除缓存 , 以便下次重建
+                                                                delete self.cache[file];
+                                                                return '!' + file;
+                                                            });
+                                                        }
+
                                                         log('gulp matched start');
                                                         log('' + glob.join('\n'));
+                                                        log('gulp removeGlob start');
+                                                        log('' + removeGlob.join('\n'));
+                                                        matched = _globby2.default.sync(glob.concat(removeGlob), opt);
 
-                                                        clean = function clean(exists, cleanFiles) {
-                                                            var existMap = (0, _keyBy3.default)(exists, function (exist) {
-                                                                var key = _path2.default.resolve(dest, exist);
-                                                                return key;
-                                                            });
-                                                            (0, _each3.default)(cleanFiles, function (file) {
-                                                                file = _path2.default.resolve(dest, file);
-                                                                if (!existMap[file]) {
-                                                                    _del2.default.sync(file);
-                                                                }
-                                                            });
-                                                        };
+                                                        log('gulp matched end ' + (0, _stringify2.default)(matched));
 
-                                                        matched = _globby2.default.sync(glob, opt);
-
-                                                        log('gulp matched end');
-                                                        //得到需要处理的文件
-                                                        files = (0, _core.getFiles)(conf.replace, _path2.default.dirname(conf.__filename), dest);
+                                                        //得到需要追加或替换的文件
+                                                        files = (0, _core.getFiles)(conf.replace, _path2.default.dirname(conf.__filename), matched);
                                                         sourceFiles = [];
                                                         stream = _gulp3.default.src(matched, opt);
-
+                                                        // .pipe(through.obj(function (file, encoding, cb) {
+                                                        //     let contents = file.checksum;
+                                                        //     if (!contents && file.isBuffer()) {
+                                                        //         contents = file.contents.toString('utf8');
+                                                        //     }
+                                                        //     file.__old = contents;
+                                                        //     this.push(file);
+                                                        //     cb();
+                                                        // }))
 
                                                         log('gulp file replace start');
                                                         //对流进行预先处理 , 追加文件,替换文件,删除文件,等
                                                         stream = stream.pipe((0, _core.gulpCUD)(files, tmp));
                                                         log('gulp file replace end');
-
-                                                        log('gulp record start');
-                                                        stream = stream.pipe(function () {
-                                                            return _through2.default.obj(function (file, encoding, cb) {
-                                                                sourceFiles.push(file.relative);
-                                                                this.push(file);
-                                                                cb();
-                                                            });
-                                                        }());
-                                                        log('gulp record end');
 
                                                         pipes = conf.pipe;
 
@@ -491,32 +478,71 @@ var Kgr = function () {
                                                             return stream;
                                                         }, stream);
                                                         log('gulp content replace end');
-                                                        stream.pipe((0, _gulpCached2.default)(conf.name + ':' + conf.version)).pipe(_gulp3.default.dest('' + dest)).on('end', function () {
+                                                        log('gulp record start');
+                                                        stream = stream.pipe(function () {
+                                                            return _through2.default.obj(function (file, encoding, cb) {
+                                                                sourceFiles.push(file.relative);
+                                                                var contents = file.checksum;
+                                                                if (!contents && file.isBuffer()) {
+                                                                    contents = file.contents.toString('utf8');
+                                                                }
+                                                                if (file.__new === true) {
+                                                                    console.log(_chalk2.default.underline.green('file          newed   ::   ' + file.relative));
+                                                                }
+                                                                if (file.__changed === true) {
+                                                                    console.log(_chalk2.default.underline.green('file        changed   ::   ' + file.relative));
+                                                                }
+                                                                if (!self.cache.hasOwnProperty(file.relative)) {
+                                                                    console.log(_chalk2.default.underline.green('content         init  ::   ' + file.relative));
+                                                                    this.push(file);
+                                                                    self.cache[file.relative] = contents;
+                                                                }
+                                                                if (self.cache[file.relative] !== contents) {
+                                                                    console.log(_chalk2.default.underline.green('content     changed   ::   ' + file.relative));
+                                                                    this.push(file);
+                                                                    self.cache[file.relative] = contents;
+                                                                }
+                                                                cb();
+                                                            });
+                                                        }());
+                                                        log('gulp record end');
+                                                        stream.pipe(_gulp3.default.dest('' + dest)).on('end', function () {
                                                             log('clean start');
-                                                            var cleanFiles = _globby2.default.sync(glob, { base: dest, cwd: dest, nodir: true });
-                                                            clean(sourceFiles, cleanFiles);
+                                                            //清理已删除或不应存在在dest目录中的文件
+                                                            var cleanFiles = _globby2.default.sync(glob, { base: dest, cwd: dest });
+                                                            log('sourceFiles ' + (0, _stringify2.default)(sourceFiles));
+                                                            log('cleanFiles ' + (0, _stringify2.default)(cleanFiles));
+                                                            //删除时清除缓存 , 以便下次重建
+                                                            var matchedClean = (0, _core.clean)(sourceFiles, cleanFiles);
+                                                            (0, _each3.default)(matchedClean, function (file) {
+                                                                var _file = _path2.default.resolve(dest, file);
+                                                                console.log(_chalk2.default.underline.yellow('file          clean   ::   ' + file));
+                                                                _del2.default.sync(_file);
+                                                                delete self.cache[file];
+                                                            });
                                                             log('clean end');
                                                             log('end pipe...');
+                                                            console.log('' + _chalk2.default.green('end pipe task...'));
                                                             resolve(conf);
                                                         }).on('error', function (err) {
                                                             log('error pipe... ' + err);
                                                             reject(err);
                                                         });
-                                                        _context4.next = 37;
+                                                        _context4.next = 39;
                                                         break;
 
-                                                    case 34:
-                                                        _context4.prev = 34;
+                                                    case 36:
+                                                        _context4.prev = 36;
                                                         _context4.t0 = _context4['catch'](0);
 
                                                         reject(_context4.t0);
 
-                                                    case 37:
+                                                    case 39:
                                                     case 'end':
                                                         return _context4.stop();
                                                 }
                                             }
-                                        }, _callee4, _this2, [[0, 34]]);
+                                        }, _callee4, _this2, [[0, 36]]);
                                     }));
 
                                     return function (_x3, _x4) {
@@ -663,67 +689,69 @@ var Kgr = function () {
                                 }();
 
                                 _context8.prev = 2;
-                                _context8.next = 5;
+
+                                this.cache = {};
+                                _context8.next = 6;
                                 return this.gulp(name);
 
-                            case 5:
-                                _context8.next = 7;
+                            case 6:
+                                _context8.next = 8;
                                 return this.configForName(name);
 
-                            case 7:
+                            case 8:
                                 conf = _context8.sent;
                                 dest = this.destPath(conf);
 
                                 if (_fs2.default.existsSync(dest)) {
-                                    _context8.next = 11;
+                                    _context8.next = 12;
                                     break;
                                 }
 
                                 throw new Error('can fount dest path ' + dest);
 
-                            case 11:
-                                _context8.next = 13;
+                            case 12:
+                                _context8.next = 14;
                                 return watch();
 
-                            case 13:
+                            case 14:
                                 if (!conf.start) {
-                                    _context8.next = 24;
+                                    _context8.next = 25;
                                     break;
                                 }
 
-                                _context8.prev = 14;
-                                _context8.next = 17;
+                                _context8.prev = 15;
+                                _context8.next = 18;
                                 return (0, _core.runShell)(conf.start, { cwd: dest });
 
-                            case 17:
+                            case 18:
                                 shell = _context8.sent;
 
                                 bash = shell[2];
-                                _context8.next = 24;
+                                _context8.next = 25;
                                 break;
 
-                            case 21:
-                                _context8.prev = 21;
-                                _context8.t0 = _context8['catch'](14);
+                            case 22:
+                                _context8.prev = 22;
+                                _context8.t0 = _context8['catch'](15);
 
                                 console.error(_context8.t0);
 
-                            case 24:
+                            case 25:
                                 console.log('' + _chalk2.default.green.underline('success : ' + dest));
-                                _context8.next = 30;
+                                _context8.next = 31;
                                 break;
 
-                            case 27:
-                                _context8.prev = 27;
+                            case 28:
+                                _context8.prev = 28;
                                 _context8.t1 = _context8['catch'](2);
                                 throw _context8.t1;
 
-                            case 30:
+                            case 31:
                             case 'end':
                                 return _context8.stop();
                         }
                     }
-                }, _callee8, this, [[2, 27], [14, 21]]);
+                }, _callee8, this, [[2, 28], [15, 22]]);
             }));
 
             function devServer(_x5) {
@@ -827,70 +855,71 @@ var Kgr = function () {
                                         while (1) {
                                             switch (_context13.prev = _context13.next) {
                                                 case 0:
-                                                    _context13.next = 2;
+                                                    _this5.cache = {};
+                                                    _context13.next = 3;
                                                     return _this5.gulp(name);
 
-                                                case 2:
+                                                case 3:
                                                     args = _this5.getArgs();
-                                                    _context13.next = 5;
+                                                    _context13.next = 6;
                                                     return _this5.configForName(name);
 
-                                                case 5:
+                                                case 6:
                                                     conf = _context13.sent;
                                                     dest = _this5.destPath(conf);
 
                                                     if (_fs2.default.existsSync(dest)) {
-                                                        _context13.next = 9;
+                                                        _context13.next = 10;
                                                         break;
                                                     }
 
                                                     return _context13.abrupt('return');
 
-                                                case 9:
+                                                case 10:
                                                     if (!conf.build) {
-                                                        _context13.next = 18;
+                                                        _context13.next = 19;
                                                         break;
                                                     }
 
-                                                    _context13.prev = 10;
-                                                    _context13.next = 13;
+                                                    _context13.prev = 11;
+                                                    _context13.next = 14;
                                                     return (0, _core.runShell)(conf.build, { cwd: dest });
 
-                                                case 13:
-                                                    _context13.next = 18;
+                                                case 14:
+                                                    _context13.next = 19;
                                                     break;
 
-                                                case 15:
-                                                    _context13.prev = 15;
-                                                    _context13.t0 = _context13['catch'](10);
+                                                case 16:
+                                                    _context13.prev = 16;
+                                                    _context13.t0 = _context13['catch'](11);
 
                                                     console.error(_context13.t0);
 
-                                                case 18:
+                                                case 19:
                                                     if (!_fs2.default.existsSync(args.output)) {
-                                                        _context13.next = 23;
+                                                        _context13.next = 24;
                                                         break;
                                                     }
 
-                                                    _context13.next = 21;
+                                                    _context13.next = 22;
                                                     return (0, _core.runShell)('cd ' + args.output + ' && tar -zcf ' + conf.name + '.' + conf.version + '.tar.gz -C ' + dest + ' .');
 
-                                                case 21:
-                                                    _context13.next = 24;
+                                                case 22:
+                                                    _context13.next = 25;
                                                     break;
 
-                                                case 23:
+                                                case 24:
                                                     console.log('' + _chalk2.default.yellow('warning : args.output \u4E0D\u5B58\u5728'));
 
-                                                case 24:
+                                                case 25:
                                                     console.log('' + _chalk2.default.green.underline('success : ' + dest));
 
-                                                case 25:
+                                                case 26:
                                                 case 'end':
                                                     return _context13.stop();
                                             }
                                         }
-                                    }, _callee13, _this5, [[10, 15]]);
+                                    }, _callee13, _this5, [[11, 16]]);
                                 }))]);
 
                             case 2:
