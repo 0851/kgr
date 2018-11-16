@@ -170,19 +170,19 @@ var Kgr = function () {
         key: 'sourcePath',
         value: function sourcePath(conf) {
             var version = conf.version;
-            var tmp = this.getArgs().tmp || '.source';
-            tmp = (0, _core.getAbsPath)(tmp);
-            var source = _path2.default.resolve(tmp, '.source', conf.name, version);
+            var source = this.getArgs().source || '.source';
+            source = (0, _core.getAbsPath)(source);
+            source = _path2.default.resolve(source, conf.name, version);
             return source;
         }
     }, {
         key: 'destPath',
         value: function destPath(conf) {
             var version = conf.version;
-            var tmp = this.getArgs().tmp || '.source';
-            tmp = (0, _core.getAbsPath)(tmp);
-            var source = _path2.default.resolve(tmp, '.dest', conf.name, version);
-            return source;
+            var output = this.getArgs().output || 'dest';
+            output = (0, _core.getAbsPath)(output);
+            output = _path2.default.resolve(output, conf.name, version);
+            return output;
         }
     }, {
         key: 'init',
@@ -896,31 +896,21 @@ var Kgr = function () {
                                                     console.error(_context13.t0);
 
                                                 case 19:
-                                                    if (!_fs2.default.existsSync(args.output)) {
-                                                        _context13.next = 24;
-                                                        break;
-                                                    }
-
-                                                    _context13.next = 22;
-                                                    return (0, _core.runShell)('cd ' + args.output + ' && tar -zcf ' + conf.name + '.' + conf.version + '.tar.gz -C ' + dest + ' .');
-
-                                                case 22:
-                                                    _context13.next = 25;
-                                                    break;
-
-                                                case 24:
-                                                    console.log('' + _chalk2.default.yellow('warning : args.output \u4E0D\u5B58\u5728'));
-
-                                                case 25:
-                                                    console.log('' + _chalk2.default.green.underline('success : ' + dest));
-
-                                                case 26:
                                                 case 'end':
                                                     return _context13.stop();
                                             }
                                         }
                                     }, _callee13, _this5, [[11, 16]]);
-                                }))]);
+                                }))]
+                                // if (fs.existsSync(args.output)) {
+                                //     await runShell(
+                                //         `cd ${args.output} && tar -zcf ${conf.name}.${conf.version}.tar.gz -C ${dest} .`
+                                //     );
+                                // } else {
+                                //     console.log(`${chalk.yellow(`warning : args.output 不存在`)}`);
+                                // }
+                                // console.log(`${chalk.green.underline(`success : ${dest}`)}`);
+                                );
 
                             case 2:
                             case 'end':

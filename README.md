@@ -12,7 +12,7 @@ Options:
   -V, --version          output the version number
   -c, --config [config]  config file ',' separated, glob mode
   -o, --output [output]  output path (default: "dist")
-  -t, --tmp [tmp]        tmp path (default: ".source")
+  -s, --source [source]  source path (default: ".source")
   -m, --mode [mode]      run project mode , default dev (default: "dev")
   -n, --name [name]      run project name , default find first name in config file (default: "")
   --init [init]          init project (default: "") 是否需要重新init
@@ -24,14 +24,14 @@ Options:
 ### 说明
 执行流程
 1. 检出配置文件中 `git` 对应的 `remote` `version(这里可以是branch , tag , commitid)` , 同时执行初始化操作 如 `npm install`
-2. 复制到指定目录 \[下文中使用`tmp`代替\]
+2. 复制到指定目录 \[下文中使用`.source`代替\]
 3. 删除配置文件中`remove`匹配的文件
-4. 替换配置文件中`replace`参数内的文件到`tmp` , `replace` 规则如下:
+4. 替换配置文件中`replace`参数内的文件到`.source` , `replace` 规则如下:
     1. `source`,`target` 可使用绝对路径 , 或相对路径
-    2. `source`相对路径 , 使用当前配置文件作为依据 , `target`相对路径使用的是`tmp`目录作为依据
+    2. `source`相对路径 , 使用当前配置文件作为依据 , `target`相对路径使用的是`.source`目录作为依据
     3. `source` 文件存在 , `target` 文件存在 --> 执行替换操作
     4. `source` 文件存在 , `target` 文件不存在 --> 执行添加操作
-5. 使用配置文件中的`pipe`参数过滤`tmp`内部的所有文件 , 默认会忽略掉一些大文件 , 规则
+5. 使用配置文件中的`pipe`参数过滤`.source`内部的所有文件 , 默认会忽略掉一些大文件 , 规则
     1. 使用glob`['./**/*','!./{bower_components,node_modules,dist,build}{,/**}','!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}']`
     2. 可在配置文件中添加`glob`数组, 追加已经忽略的文件 如 `"glob":["./node_modules/kpc/src/components/*.js"]`
 6. `dev` 模式下会监听配置文件,`replace`参数内的源文件改动 , 重新执行`2`,`3`,`4`步骤 ; `build`模式下将会导出`tar.gz`的文件到指定的`output`目录下,如`output`不存在,只做提示不做任何处理

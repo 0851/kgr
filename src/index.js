@@ -54,19 +54,19 @@ class Kgr {
 
     sourcePath(conf) {
         const version = conf.version;
-        let tmp = this.getArgs().tmp || '.source';
-        tmp = getAbsPath(tmp);
-        const source = path.resolve(tmp, '.source', conf.name, version);
+        let source = this.getArgs().source || '.source';
+        source = getAbsPath(source);
+        source = path.resolve(source, conf.name, version);
         return source;
     }
 
 
     destPath(conf) {
         let version = conf.version;
-        let tmp = this.getArgs().tmp || '.source';
-        tmp = getAbsPath(tmp);
-        let source = path.resolve(tmp, '.dest', conf.name, version);
-        return source;
+        let output = this.getArgs().output || 'dest';
+        output = getAbsPath(output);
+        output = path.resolve(output, conf.name, version);
+        return output;
     }
 
     async init(name) {
@@ -373,14 +373,14 @@ class Kgr {
                         console.error(e)
                     }
                 }
-                if (fs.existsSync(args.output)) {
-                    await runShell(
-                        `cd ${args.output} && tar -zcf ${conf.name}.${conf.version}.tar.gz -C ${dest} .`
-                    );
-                } else {
-                    console.log(`${chalk.yellow(`warning : args.output 不存在`)}`);
-                }
-                console.log(`${chalk.green.underline(`success : ${dest}`)}`);
+                // if (fs.existsSync(args.output)) {
+                //     await runShell(
+                //         `cd ${args.output} && tar -zcf ${conf.name}.${conf.version}.tar.gz -C ${dest} .`
+                //     );
+                // } else {
+                //     console.log(`${chalk.yellow(`warning : args.output 不存在`)}`);
+                // }
+                // console.log(`${chalk.green.underline(`success : ${dest}`)}`);
             }
         ]);
     }
