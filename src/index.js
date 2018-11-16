@@ -104,7 +104,7 @@ class Kgr {
         const _copyDest = async () => {
             log('cp start')
             try {
-                await runShell(`mkdir -p ${dest} && cd ${dest} && tar -zxf ${path.resolve(source, tarName)}`);
+                await runShell(`rm -rf  ${dest} && mkdir -p ${dest} && cd ${dest} && tar -zxf ${path.resolve(source, tarName)}`);
             } catch (e) {
                 throw e
             }

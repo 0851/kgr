@@ -295,7 +295,7 @@ var Kgr = function () {
                                                         log('cp start');
                                                         _context2.prev = 1;
                                                         _context2.next = 4;
-                                                        return (0, _core.runShell)('mkdir -p ' + dest + ' && cd ' + dest + ' && tar -zxf ' + _path2.default.resolve(source, tarName));
+                                                        return (0, _core.runShell)('rm -rf  ' + dest + ' && mkdir -p ' + dest + ' && cd ' + dest + ' && tar -zxf ' + _path2.default.resolve(source, tarName));
 
                                                     case 4:
                                                         _context2.next = 9;
