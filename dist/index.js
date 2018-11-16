@@ -181,7 +181,7 @@ var Kgr = function () {
             var version = conf.version;
             var output = this.getArgs().output || 'dest';
             output = (0, _core.getAbsPath)(output);
-            output = _path2.default.resolve(output, conf.name, version);
+            output = _path2.default.resolve(output);
             return output;
         }
     }, {
@@ -295,7 +295,7 @@ var Kgr = function () {
                                                         log('cp start');
                                                         _context2.prev = 1;
                                                         _context2.next = 4;
-                                                        return (0, _core.runShell)('rm -rf  ' + dest + ' && mkdir -p ' + dest + ' && cd ' + dest + ' && tar -zxf ' + _path2.default.resolve(source, tarName));
+                                                        return (0, _core.runShell)('rm -rf  ' + dest + ' && mkdir -p ' + dest + ' && cd ' + dest + ' && tar -zxf ' + _path2.default.resolve(source, tarName) + ' && echo \'' + version + '\' > .version-' + conf.name + '-' + version);
 
                                                     case 4:
                                                         _context2.next = 9;
@@ -357,7 +357,7 @@ var Kgr = function () {
                                 return _copyDest();
 
                             case 29:
-                                if (_fs2.default.existsSync(_path2.default.resolve(dest, successFile))) {
+                                if (_fs2.default.existsSync(_path2.default.resolve(dest, '.version-' + conf.name + '-' + version))) {
                                     _context3.next = 32;
                                     break;
                                 }

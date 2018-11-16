@@ -65,7 +65,7 @@ class Kgr {
         let version = conf.version;
         let output = this.getArgs().output || 'dest';
         output = getAbsPath(output);
-        output = path.resolve(output, conf.name, version);
+        output = path.resolve(output);
         return output;
     }
 
@@ -104,7 +104,7 @@ class Kgr {
         const _copyDest = async () => {
             log('cp start')
             try {
-                await runShell(`rm -rf  ${dest} && mkdir -p ${dest} && cd ${dest} && tar -zxf ${path.resolve(source, tarName)}`);
+                await runShell(`rm -rf  ${dest} && mkdir -p ${dest} && cd ${dest} && tar -zxf ${path.resolve(source, tarName)} && echo '${version}' > .version-${conf.name}-${version}`);
             } catch (e) {
                 throw e
             }
@@ -139,7 +139,7 @@ class Kgr {
         if (args.copy) {
             await _copyDest();
         }
-        if (!fs.existsSync(path.resolve(dest, successFile))) {
+        if (!fs.existsSync(path.resolve(dest, `.version-${conf.name}-${version}`))) {
             await _copyDest();
         }
         return conf;
