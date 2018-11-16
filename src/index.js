@@ -19,8 +19,6 @@ import del from 'del';
 import pify from 'pify';
 
 const log = debug(pkg.name);
-let successFile = `.kgr_success`;
-let versionFile = `.kgr_version`;
 
 class Kgr {
     constructor(args) {
@@ -82,6 +80,8 @@ class Kgr {
         const version = conf.version;
         const source = this.sourcePath(conf);
         const dest = this.destPath(conf);
+        let successFile = `.kgr_success`;
+        let versionFile = `.kgr_version_${conf.name}_${conf.version}`;
         let tarName = `${conf.name}-${version}.tar.gz`;
         const _init = async () => {
             try {
@@ -267,6 +267,7 @@ class Kgr {
                         const cleanFiles = globby.sync(glob, {base: dest, cwd: dest});
                         log(`sourceFiles ${JSON.stringify(sourceFiles)}`);
                         log(`cleanFiles ${JSON.stringify(cleanFiles)}`);
+                        let versionFile = `.kgr_version_${conf.name}_${conf.version}`;
                         //删除时清除缓存 , 以便下次重建
                         const matchedClean = clean(sourceFiles, cleanFiles);
                         _.each(matchedClean, (file) => {

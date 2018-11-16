@@ -127,8 +127,6 @@ var _pify2 = _interopRequireDefault(_pify);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var log = (0, _debug2.default)(_package2.default.name);
-var successFile = '.kgr_success';
-var versionFile = '.kgr_version';
 
 var Kgr = function () {
     function Kgr(args) {
@@ -192,7 +190,7 @@ var Kgr = function () {
             var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(name) {
                 var _this = this;
 
-                var conf, args, _ref2, _ref3, sdtout, sdterr, url, version, source, dest, tarName, _init, _copyDest;
+                var conf, args, _ref2, _ref3, sdtout, sdterr, url, version, source, dest, successFile, versionFile, tarName, _init, _copyDest;
 
                 return _regenerator2.default.wrap(function _callee3$(_context3) {
                     while (1) {
@@ -225,6 +223,8 @@ var Kgr = function () {
                                 version = conf.version;
                                 source = this.sourcePath(conf);
                                 dest = this.destPath(conf);
+                                successFile = '.kgr_success';
+                                versionFile = '.kgr_version_' + conf.name + '_' + conf.version;
                                 tarName = conf.name + '-' + version + '.tar.gz';
 
                                 _init = function () {
@@ -270,23 +270,23 @@ var Kgr = function () {
                                 }();
 
                                 if (!args.init) {
-                                    _context3.next = 21;
+                                    _context3.next = 23;
                                     break;
                                 }
 
-                                _context3.next = 21;
+                                _context3.next = 23;
                                 return _init();
 
-                            case 21:
+                            case 23:
                                 if (_fs2.default.existsSync(_path2.default.resolve(source, successFile))) {
-                                    _context3.next = 24;
+                                    _context3.next = 26;
                                     break;
                                 }
 
-                                _context3.next = 24;
+                                _context3.next = 26;
                                 return _init();
 
-                            case 24:
+                            case 26:
                                 _copyDest = function () {
                                     var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
                                         return _regenerator2.default.wrap(function _callee2$(_context2) {
@@ -350,26 +350,26 @@ var Kgr = function () {
                                 }();
 
                                 if (!args.copy) {
-                                    _context3.next = 28;
+                                    _context3.next = 30;
                                     break;
                                 }
 
-                                _context3.next = 28;
+                                _context3.next = 30;
                                 return _copyDest();
 
-                            case 28:
+                            case 30:
                                 if (_fs2.default.existsSync(_path2.default.resolve(dest, '' + versionFile))) {
-                                    _context3.next = 31;
+                                    _context3.next = 33;
                                     break;
                                 }
 
-                                _context3.next = 31;
+                                _context3.next = 33;
                                 return _copyDest();
 
-                            case 31:
+                            case 33:
                                 return _context3.abrupt('return', conf);
 
-                            case 32:
+                            case 34:
                             case 'end':
                                 return _context3.stop();
                         }
@@ -513,6 +513,7 @@ var Kgr = function () {
                                                             var cleanFiles = _globby2.default.sync(glob, { base: dest, cwd: dest });
                                                             log('sourceFiles ' + (0, _stringify2.default)(sourceFiles));
                                                             log('cleanFiles ' + (0, _stringify2.default)(cleanFiles));
+                                                            var versionFile = '.kgr_version_' + conf.name + '_' + conf.version;
                                                             //删除时清除缓存 , 以便下次重建
                                                             var matchedClean = (0, _core.clean)(sourceFiles, cleanFiles);
                                                             (0, _each3.default)(matchedClean, function (file) {
