@@ -81,7 +81,8 @@ class Kgr {
         const source = this.sourcePath(conf);
         const dest = this.destPath(conf);
         let tarName = `${conf.name}-${version}.tar.gz`;
-        let successFile = `.kge_success`;
+        let successFile = `.kgr_success`;
+        let versionFile = `.kgr_${conf.name}_${version}`;
         const _init = async () => {
             try {
                 await runShell(
@@ -104,7 +105,7 @@ class Kgr {
         const _copyDest = async () => {
             log('cp start')
             try {
-                await runShell(`rm -rf  ${dest} && mkdir -p ${dest} && cd ${dest} && tar -zxf ${path.resolve(source, tarName)} && echo '${version}' > .version-${conf.name}-${version}`);
+                await runShell(`rm -rf  ${dest} && mkdir -p ${dest} && cd ${dest} && tar -zxf ${path.resolve(source, tarName)} && echo '${version}' > ${versionFile}`);
             } catch (e) {
                 throw e
             }
@@ -139,7 +140,7 @@ class Kgr {
         if (args.copy) {
             await _copyDest();
         }
-        if (!fs.existsSync(path.resolve(dest, `.version-${conf.name}-${version}`))) {
+        if (!fs.existsSync(path.resolve(dest, `${versionFile}`))) {
             await _copyDest();
         }
         return conf;

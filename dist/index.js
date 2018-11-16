@@ -190,7 +190,7 @@ var Kgr = function () {
             var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(name) {
                 var _this = this;
 
-                var conf, args, _ref2, _ref3, sdtout, sdterr, url, version, source, dest, tarName, successFile, _init, _copyDest;
+                var conf, args, _ref2, _ref3, sdtout, sdterr, url, version, source, dest, tarName, successFile, versionFile, _init, _copyDest;
 
                 return _regenerator2.default.wrap(function _callee3$(_context3) {
                     while (1) {
@@ -224,7 +224,8 @@ var Kgr = function () {
                                 source = this.sourcePath(conf);
                                 dest = this.destPath(conf);
                                 tarName = conf.name + '-' + version + '.tar.gz';
-                                successFile = '.kge_success';
+                                successFile = '.kgr_success';
+                                versionFile = '.kgr_' + conf.name + '_' + version;
 
                                 _init = function () {
                                     var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
@@ -269,23 +270,23 @@ var Kgr = function () {
                                 }();
 
                                 if (!args.init) {
-                                    _context3.next = 22;
+                                    _context3.next = 23;
                                     break;
                                 }
 
-                                _context3.next = 22;
+                                _context3.next = 23;
                                 return _init();
 
-                            case 22:
+                            case 23:
                                 if (_fs2.default.existsSync(_path2.default.resolve(source, successFile))) {
-                                    _context3.next = 25;
+                                    _context3.next = 26;
                                     break;
                                 }
 
-                                _context3.next = 25;
+                                _context3.next = 26;
                                 return _init();
 
-                            case 25:
+                            case 26:
                                 _copyDest = function () {
                                     var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
                                         return _regenerator2.default.wrap(function _callee2$(_context2) {
@@ -295,7 +296,7 @@ var Kgr = function () {
                                                         log('cp start');
                                                         _context2.prev = 1;
                                                         _context2.next = 4;
-                                                        return (0, _core.runShell)('rm -rf  ' + dest + ' && mkdir -p ' + dest + ' && cd ' + dest + ' && tar -zxf ' + _path2.default.resolve(source, tarName) + ' && echo \'' + version + '\' > .version-' + conf.name + '-' + version);
+                                                        return (0, _core.runShell)('rm -rf  ' + dest + ' && mkdir -p ' + dest + ' && cd ' + dest + ' && tar -zxf ' + _path2.default.resolve(source, tarName) + ' && echo \'' + version + '\' > ' + versionFile);
 
                                                     case 4:
                                                         _context2.next = 9;
@@ -349,26 +350,26 @@ var Kgr = function () {
                                 }();
 
                                 if (!args.copy) {
-                                    _context3.next = 29;
+                                    _context3.next = 30;
                                     break;
                                 }
 
-                                _context3.next = 29;
+                                _context3.next = 30;
                                 return _copyDest();
 
-                            case 29:
-                                if (_fs2.default.existsSync(_path2.default.resolve(dest, '.version-' + conf.name + '-' + version))) {
-                                    _context3.next = 32;
+                            case 30:
+                                if (_fs2.default.existsSync(_path2.default.resolve(dest, '' + versionFile))) {
+                                    _context3.next = 33;
                                     break;
                                 }
 
-                                _context3.next = 32;
+                                _context3.next = 33;
                                 return _copyDest();
-
-                            case 32:
-                                return _context3.abrupt('return', conf);
 
                             case 33:
+                                return _context3.abrupt('return', conf);
+
+                            case 34:
                             case 'end':
                                 return _context3.stop();
                         }
