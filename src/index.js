@@ -19,6 +19,8 @@ import del from 'del';
 import pify from 'pify';
 
 const log = debug(pkg.name);
+let successFile = `.kgr_success`;
+let versionFile = `.kgr_version`;
 
 class Kgr {
     constructor(args) {
@@ -81,8 +83,6 @@ class Kgr {
         const source = this.sourcePath(conf);
         const dest = this.destPath(conf);
         let tarName = `${conf.name}-${version}.tar.gz`;
-        let successFile = `.kgr_success`;
-        let versionFile = `.kgr_${conf.name}_${version}`;
         const _init = async () => {
             try {
                 await runShell(
@@ -105,7 +105,7 @@ class Kgr {
         const _copyDest = async () => {
             log('cp start')
             try {
-                await runShell(`rm -rf  ${dest} && mkdir -p ${dest} && cd ${dest} && tar -zxf ${path.resolve(source, tarName)} && echo '${version}' > ${versionFile}`);
+                await runShell(`rm -rf  ${dest} && mkdir -p ${dest} && cd ${dest} && tar -zxf ${path.resolve(source, tarName)} && echo '${conf.name}:${version}' > ${versionFile}`);
             } catch (e) {
                 throw e
             }
@@ -270,6 +270,9 @@ class Kgr {
                         //删除时清除缓存 , 以便下次重建
                         const matchedClean = clean(sourceFiles, cleanFiles);
                         _.each(matchedClean, (file) => {
+                            if (file === versionFile) {
+                                return
+                            }
                             const _file = path.resolve(dest, file);
                             console.log(chalk.underline.yellow(`file          clean   ::   ${file}`))
                             del.sync(_file);

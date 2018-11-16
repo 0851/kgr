@@ -127,6 +127,8 @@ var _pify2 = _interopRequireDefault(_pify);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var log = (0, _debug2.default)(_package2.default.name);
+var successFile = '.kgr_success';
+var versionFile = '.kgr_version';
 
 var Kgr = function () {
     function Kgr(args) {
@@ -190,7 +192,7 @@ var Kgr = function () {
             var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(name) {
                 var _this = this;
 
-                var conf, args, _ref2, _ref3, sdtout, sdterr, url, version, source, dest, tarName, successFile, versionFile, _init, _copyDest;
+                var conf, args, _ref2, _ref3, sdtout, sdterr, url, version, source, dest, tarName, _init, _copyDest;
 
                 return _regenerator2.default.wrap(function _callee3$(_context3) {
                     while (1) {
@@ -224,8 +226,6 @@ var Kgr = function () {
                                 source = this.sourcePath(conf);
                                 dest = this.destPath(conf);
                                 tarName = conf.name + '-' + version + '.tar.gz';
-                                successFile = '.kgr_success';
-                                versionFile = '.kgr_' + conf.name + '_' + version;
 
                                 _init = function () {
                                     var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
@@ -270,23 +270,23 @@ var Kgr = function () {
                                 }();
 
                                 if (!args.init) {
-                                    _context3.next = 23;
+                                    _context3.next = 21;
                                     break;
                                 }
 
-                                _context3.next = 23;
+                                _context3.next = 21;
                                 return _init();
 
-                            case 23:
+                            case 21:
                                 if (_fs2.default.existsSync(_path2.default.resolve(source, successFile))) {
-                                    _context3.next = 26;
+                                    _context3.next = 24;
                                     break;
                                 }
 
-                                _context3.next = 26;
+                                _context3.next = 24;
                                 return _init();
 
-                            case 26:
+                            case 24:
                                 _copyDest = function () {
                                     var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
                                         return _regenerator2.default.wrap(function _callee2$(_context2) {
@@ -296,7 +296,7 @@ var Kgr = function () {
                                                         log('cp start');
                                                         _context2.prev = 1;
                                                         _context2.next = 4;
-                                                        return (0, _core.runShell)('rm -rf  ' + dest + ' && mkdir -p ' + dest + ' && cd ' + dest + ' && tar -zxf ' + _path2.default.resolve(source, tarName) + ' && echo \'' + version + '\' > ' + versionFile);
+                                                        return (0, _core.runShell)('rm -rf  ' + dest + ' && mkdir -p ' + dest + ' && cd ' + dest + ' && tar -zxf ' + _path2.default.resolve(source, tarName) + ' && echo \'' + conf.name + ':' + version + '\' > ' + versionFile);
 
                                                     case 4:
                                                         _context2.next = 9;
@@ -350,26 +350,26 @@ var Kgr = function () {
                                 }();
 
                                 if (!args.copy) {
-                                    _context3.next = 30;
+                                    _context3.next = 28;
                                     break;
                                 }
 
-                                _context3.next = 30;
+                                _context3.next = 28;
                                 return _copyDest();
 
-                            case 30:
+                            case 28:
                                 if (_fs2.default.existsSync(_path2.default.resolve(dest, '' + versionFile))) {
-                                    _context3.next = 33;
+                                    _context3.next = 31;
                                     break;
                                 }
 
-                                _context3.next = 33;
+                                _context3.next = 31;
                                 return _copyDest();
 
-                            case 33:
+                            case 31:
                                 return _context3.abrupt('return', conf);
 
-                            case 34:
+                            case 32:
                             case 'end':
                                 return _context3.stop();
                         }
@@ -516,6 +516,9 @@ var Kgr = function () {
                                                             //删除时清除缓存 , 以便下次重建
                                                             var matchedClean = (0, _core.clean)(sourceFiles, cleanFiles);
                                                             (0, _each3.default)(matchedClean, function (file) {
+                                                                if (file === versionFile) {
+                                                                    return;
+                                                                }
                                                                 var _file = _path2.default.resolve(dest, file);
                                                                 console.log(_chalk2.default.underline.yellow('file          clean   ::   ' + file));
                                                                 _del2.default.sync(_file);
