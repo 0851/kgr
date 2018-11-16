@@ -246,7 +246,7 @@ class Kgr {
                             console.log(chalk.underline.green(`file        changed   ::   ${file.relative}`))
                         }
                         if (!self.cache.hasOwnProperty(file.relative)) {
-                            console.log(chalk.underline.green(`content         init  ::   ${file.relative}`))
+                            console.log(chalk.underline.green(`content        init   ::   ${file.relative}`))
                             this.push(file);
                             self.cache[file.relative] = contents;
                         }

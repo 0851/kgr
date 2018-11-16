@@ -494,7 +494,7 @@ var Kgr = function () {
                                                                     console.log(_chalk2.default.underline.green('file        changed   ::   ' + file.relative));
                                                                 }
                                                                 if (!self.cache.hasOwnProperty(file.relative)) {
-                                                                    console.log(_chalk2.default.underline.green('content         init  ::   ' + file.relative));
+                                                                    console.log(_chalk2.default.underline.green('content        init   ::   ' + file.relative));
                                                                     this.push(file);
                                                                     self.cache[file.relative] = contents;
                                                                 }
