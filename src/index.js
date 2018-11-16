@@ -85,10 +85,10 @@ class Kgr {
         const _init = async () => {
             try {
                 await runShell(
-                    `rm -rf ${source} && git clone -b ${version} ${url} ${source} && cd ${source} && rm -rf .git && echo 'success' > ${successFile}`
+                    `rm -rf ${source} && git clone -b ${version} ${url} ${source} && cd ${source} && rm -rf .git`
                 );
                 await runShell(conf.bash, {cwd: source});
-                await runShell(`cd ${source} && b=${tarName}; tar --exclude=$b -zcf $b .`);
+                await runShell(`cd ${source} && b=${tarName}; tar --exclude=$b -zcf $b . && echo 'success' > ${successFile}`);
             } catch (e) {
                 console.log(e);
                 throw e
