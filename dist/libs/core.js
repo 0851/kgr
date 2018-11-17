@@ -13,10 +13,6 @@ var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
 
-var _promise = require('babel-runtime/core-js/promise');
-
-var _promise2 = _interopRequireDefault(_promise);
-
 var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -86,7 +82,7 @@ var tasks = function () {
                             break;
                         }
 
-                        return _context2.abrupt('continue', 16);
+                        return _context2.abrupt('continue', 15);
 
                     case 6:
                         _context2.prev = 6;
@@ -95,7 +91,7 @@ var tasks = function () {
 
                     case 9:
                         data = _context2.sent;
-                        _context2.next = 16;
+                        _context2.next = 15;
                         break;
 
                     case 12:
@@ -103,18 +99,17 @@ var tasks = function () {
                         _context2.t0 = _context2['catch'](6);
 
                         console.error(_context2.t0);
-                        throw _context2.t0;
 
-                    case 16:
+                    case 15:
                         if (processes.length) {
                             _context2.next = 3;
                             break;
                         }
 
-                    case 17:
+                    case 16:
                         return _context2.abrupt('return', data);
 
-                    case 18:
+                    case 17:
                     case 'end':
                         return _context2.stop();
                 }
@@ -143,7 +138,9 @@ var _fs = require('fs');
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _child_process = require('child_process');
+var _execa = require('execa');
+
+var _execa2 = _interopRequireDefault(_execa);
 
 var _detectImportRequire = require('detect-import-require');
 
@@ -261,27 +258,24 @@ function runShell(cmd) {
     if (!cmd) {
         return;
     }
-    log('run shell cmd : ' + cmd);
-    return new _promise2.default(function (resolve, reject) {
-        var child = (0, _child_process.exec)(cmd, (0, _extends3.default)({
-            maxBuffer: 20000 * 1024,
-            env: (0, _extends3.default)({
-                FORCE_COLOR: 1,
-                COLOR: 'always',
-                NPM_CONFIG_COLOR: 'always'
-            }, process.env, options.env || {})
-        }, options), function (error, stdout, stderr) {
-            if (error) {
-                console.log(cmd, error);
-                reject(error);
-                return;
-            }
-            resolve([stdout, stderr, child]);
-        });
-        console.log('---exec ' + cmd + ' start--- ');
-        child.stdout.pipe(process.stdout);
-        child.stderr.pipe(process.stderr);
+    console.log(_chalk2.default.green('run shell cmd : ' + cmd));
+    var child = (0, _execa2.default)(cmd, (0, _extends3.default)({
+        shell: true,
+        maxBuffer: 1000000000,
+        env: (0, _extends3.default)({
+            FORCE_COLOR: true,
+            COLOR: 'always',
+            NPM_CONFIG_COLOR: 'always'
+        }, process.env, options.env || {})
+    }, options));
+    child.stdout.pipe(process.stdout);
+    child.stderr.pipe(process.stderr);
+    child.then(function (child) {
+        return child;
+    }).catch(function (e) {
+        throw e;
     });
+    return child;
 }
 
 function getExistsReplace(replaces, source) {

@@ -9,7 +9,7 @@ module.exports = function () {
          * [pipe] <array[<function(content<string>,filename<string>,file<File Object>):content<string>>]> | <function(content<string>,filename<string>,file<File Object>):content<string>> 选填
          * [replace] <array[<object>[source,target]]> 选填
          * [start] <string> 选填 启动命令
-         * [restart] <string> 选填 更改文件后触发重启命令
+         * [restart] <string>  选填 更改文件后触发重启命令 , true 时代表重新运行start , 其他命令时 代表停止start 重启一个restart 的命令
          * [build] <string> 选填 构建命令
          */
 

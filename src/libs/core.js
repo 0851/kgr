@@ -3,7 +3,7 @@ import debug from 'debug';
 import pkg from '../../package.json';
 import _ from 'lodash';
 import fs from 'fs';
-import {spawn, exec} from 'child_process';
+import execa from 'execa';
 import detect from 'detect-import-require';
 import through from 'through2';
 import globby from 'globby';
@@ -59,38 +59,31 @@ function runShell(cmd, options = {}) {
     if (!cmd) {
         return;
     }
-    log(`run shell cmd : ${cmd}`);
-    return new Promise(function (resolve, reject) {
-        const child = exec(
-            cmd,
-            {
+    console.log(chalk.green(`run shell cmd : ${cmd}`));
+    let child = execa(cmd, {
+        ...{
+            shell: true,
+            maxBuffer: 1000000000,
+            env: {
                 ...{
-                    maxBuffer: 20000 * 1024,
-                    env: {
-                        ...{
-                            FORCE_COLOR: 1,
-                            COLOR: 'always',
-                            NPM_CONFIG_COLOR: 'always'
-                        },
-                        ...process.env,
-                        ...(options.env || {})
-                    }
+                    FORCE_COLOR: true,
+                    COLOR: 'always',
+                    NPM_CONFIG_COLOR: 'always'
                 },
-                ...options
-            },
-            (error, stdout, stderr) => {
-                if (error) {
-                    console.log(cmd, error);
-                    reject(error);
-                    return;
-                }
-                resolve([stdout, stderr, child]);
+                ...process.env,
+                ...(options.env || {})
             }
-        );
-        console.log(`---exec ${cmd} start--- `);
-        child.stdout.pipe(process.stdout);
-        child.stderr.pipe(process.stderr);
+        },
+        ...options
+    })
+    child.stdout.pipe(process.stdout);
+    child.stderr.pipe(process.stderr);
+    child.then((child) => {
+        return child;
+    }).catch((e) => {
+        throw e;
     });
+    return child;
 }
 
 async function tasks(processes) {
@@ -107,7 +100,6 @@ async function tasks(processes) {
             data = await work(data);
         } catch (e) {
             console.error(e);
-            throw e;
         }
     } while (processes.length);
     return data;
