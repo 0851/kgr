@@ -75,15 +75,14 @@ function runShell(cmd, options = {}) {
             }
         },
         ...options
-    })
+    });
     child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);
-    child.then((child) => {
+    return child.then((child) => {
         return child;
     }).catch((e) => {
         throw e;
     });
-    return child;
 }
 
 async function tasks(processes) {

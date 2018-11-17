@@ -269,9 +269,11 @@ class Kgr {
                         }
                         if (conf.restart) {
                             bash && bash.kill && bash.kill();
-                            bash = runShell(conf.restart === true ? conf.start : conf.restart, {cwd: dest});
+                            bash = runShell(conf.restart === true ? conf.start : conf.restart, {cwd: dest})
                             console.log(`${chalk.green.underline(`restart : ${dest}`)}`);
+                            await bash;
                         }
+                        console.log(`${chalk.green.underline(`restart : ${dest}`)}`);
                     } catch (e) {
                         console.error(e)
                     }
@@ -290,6 +292,7 @@ class Kgr {
         await watch();
         if (conf.start) {
             bash = runShell(conf.start, {cwd: dest});
+            console.log(`${chalk.green.underline(`success : ${dest}`)}`);
             await bash;
         }
         console.log(`${chalk.green.underline(`success : ${dest}`)}`);
@@ -344,8 +347,4 @@ class Kgr {
     }
 }
 
-process.on('unhandledRejection', (reason, p) => {
-    console.log('Unhandled Rejection at:', p, 'reason:', reason);
-    // application specific logging, throwing an error, or other logic here
-});
 export default Kgr;

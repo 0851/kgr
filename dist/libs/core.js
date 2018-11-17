@@ -270,12 +270,11 @@ function runShell(cmd) {
     }, options));
     child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);
-    child.then(function (child) {
+    return child.then(function (child) {
         return child;
     }).catch(function (e) {
         throw e;
     });
-    return child;
 }
 
 function getExistsReplace(replaces, source) {

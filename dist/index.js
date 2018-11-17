@@ -512,26 +512,34 @@ var Kgr = function () {
                                                                                 throw new Error('can fount dest path ' + _dest);
 
                                                                             case 8:
-                                                                                if (_conf2.restart) {
-                                                                                    bash && bash.kill && bash.kill();
-                                                                                    bash = (0, _core.runShell)(_conf2.restart === true ? _conf2.start : _conf2.restart, { cwd: _dest });
-                                                                                    console.log('' + _chalk2.default.green.underline('restart : ' + _dest));
+                                                                                if (!_conf2.restart) {
+                                                                                    _context4.next = 14;
+                                                                                    break;
                                                                                 }
+
+                                                                                bash && bash.kill && bash.kill();
+                                                                                bash = (0, _core.runShell)(_conf2.restart === true ? _conf2.start : _conf2.restart, { cwd: _dest });
+                                                                                console.log('' + _chalk2.default.green.underline('restart : ' + _dest));
                                                                                 _context4.next = 14;
+                                                                                return bash;
+
+                                                                            case 14:
+                                                                                console.log('' + _chalk2.default.green.underline('restart : ' + _dest));
+                                                                                _context4.next = 20;
                                                                                 break;
 
-                                                                            case 11:
-                                                                                _context4.prev = 11;
+                                                                            case 17:
+                                                                                _context4.prev = 17;
                                                                                 _context4.t0 = _context4['catch'](0);
 
                                                                                 console.error(_context4.t0);
 
-                                                                            case 14:
+                                                                            case 20:
                                                                             case 'end':
                                                                                 return _context4.stop();
                                                                         }
                                                                     }
-                                                                }, _callee4, _this3, [[0, 11]]);
+                                                                }, _callee4, _this3, [[0, 17]]);
                                                             }));
 
                                                             return function (_x3) {
@@ -581,18 +589,19 @@ var Kgr = function () {
 
                             case 11:
                                 if (!conf.start) {
-                                    _context6.next = 15;
+                                    _context6.next = 16;
                                     break;
                                 }
 
                                 bash = (0, _core.runShell)(conf.start, { cwd: dest });
-                                _context6.next = 15;
+                                console.log('' + _chalk2.default.green.underline('success : ' + dest));
+                                _context6.next = 16;
                                 return bash;
 
-                            case 15:
+                            case 16:
                                 console.log('' + _chalk2.default.green.underline('success : ' + dest));
 
-                            case 16:
+                            case 17:
                             case 'end':
                                 return _context6.stop();
                         }
@@ -814,9 +823,5 @@ var Kgr = function () {
     return Kgr;
 }();
 
-process.on('unhandledRejection', function (reason, p) {
-    console.log('Unhandled Rejection at:', p, 'reason:', reason);
-    // application specific logging, throwing an error, or other logic here
-});
 exports.default = Kgr;
 module.exports = exports.default;
