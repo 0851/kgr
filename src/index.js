@@ -122,6 +122,9 @@ class Kgr {
                 const opt = {base: tmp, cwd: tmp}
                 let glob = [
                     `./**/{*,.*}`,
+                    '!package.json',
+                    '!package-lock.json',
+                    '!yarn.lock',
                     '!./{bower_components,node_modules,dist,build}{,/**/{*,.*}}',
                     `!./**/{*,.*}.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}`
                 ];

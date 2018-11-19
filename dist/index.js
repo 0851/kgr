@@ -341,7 +341,7 @@ var Kgr = function () {
                     var tmp = _this2.sourcePath(conf);
                     var dest = _this2.destPath(conf);
                     var opt = { base: tmp, cwd: tmp };
-                    var glob = ['./**/{*,.*}', '!./{bower_components,node_modules,dist,build}{,/**/{*,.*}}', '!./**/{*,.*}.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'];
+                    var glob = ['./**/{*,.*}', '!package.json', '!package-lock.json', '!yarn.lock', '!./{bower_components,node_modules,dist,build}{,/**/{*,.*}}', '!./**/{*,.*}.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'];
 
                     if (conf.glob) {
                         conf.glob = (0, _isArray3.default)(conf.glob) ? conf.glob : [conf.glob];
