@@ -85,7 +85,7 @@ class Kgr {
                 throw new Error('please install git on your pc');
             }
             await runShell(
-                `rm -rf ${source} && git clone -b ${version} ${url} ${source} && cd ${source} && rm -rf .git`
+                `rm -rf ${source} && git clone --depth=1 -b ${version} ${url} ${source} && cd ${source} && rm -rf .git`
             );
             await runShell(conf.bash, {cwd: source});
             await runShell(`cd ${source} && b=${tarName}; tar --exclude=$b -zcf $b . && echo 'success' > ${successFile}`);
