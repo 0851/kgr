@@ -81,23 +81,23 @@ class Kgr {
 		const version = conf.version;
 		let source = this.getArgs().source || '.source';
 		source = getAbsPath(source);
-		source = path.resolve(source, conf.name, version);
+		source = path.resolve(source, version);
 		return source;
 	}
 
-	destPath(conf) {
-		let version = conf.version;
-		let dest = this.getArgs().dest || 'dest';
-		dest = getAbsPath(dest);
-		dest = path.resolve(dest);
-		return dest;
-	}
+	// destPath(conf) {
+	// 	let version = conf.version;
+	// 	let dest = this.getArgs().dest || 'dest';
+	// 	dest = getAbsPath(dest);
+	// 	dest = path.resolve(dest);
+	// 	return dest;
+	// }
 
 	outputPath(conf) {
 		let version = conf.version;
 		let output = this.getArgs().output || 'output';
 		output = getAbsPath(output);
-		output = path.resolve(output, conf.name, version);
+		output = path.resolve(output);
 		return output;
 	}
 
@@ -109,7 +109,7 @@ class Kgr {
 		const source = this.sourcePath(conf);
 		const output = this.outputPath(conf);
 		let successFile = `.kgr_success`;
-		let versionFile = `.kgr_version_${conf.name}_${conf.version}`;
+		let versionFile = `.kgr_version_${conf.version}`;
 		let tarName = `${conf.name}-${version}.tar.gz`;
 
 		const _init = async () => {
@@ -138,7 +138,7 @@ class Kgr {
 				`rm -rf ${output} && mkdir -p ${output} && cd ${output} && tar -zxf ${path.resolve(
 					source,
 					tarName
-				)} && echo '${conf.name}:${version}' > ${versionFile}`
+				)} && echo '${version}' > ${versionFile}`
 			);
 			log('cp end');
 		};
@@ -263,7 +263,7 @@ class Kgr {
 					const cleanFiles = globby.sync(glob, { base: output, cwd: output });
 					log(`sourceFiles ${JSON.stringify(sourceFiles)}`);
 					log(`cleanFiles ${JSON.stringify(cleanFiles)}`);
-					let versionFile = `.kgr_version_${conf.name}_${conf.version}`;
+					let versionFile = `.kgr_version_${conf.version}`;
 					//删除时清除缓存 , 以便下次重建
 					const matchedClean = clean(sourceFiles, cleanFiles);
 					_.each(matchedClean, (file) => {
@@ -364,13 +364,13 @@ class Kgr {
 				await this.gulp(name);
 				const conf = this.configForName(name);
 				let output = this.outputPath(conf);
-				let dest = this.destPath(conf);
+				// let dest = this.destPath(conf);
 				if (!fs.existsSync(output)) return;
 				if (conf.build) {
 					await Promise.all(conf.build, { cwd: output });
-					await runShell(
-						`mkdir -p ${dest} && cd ${dest} && tar -zcf ${conf.name}.${conf.version}.tar.gz -C ${output} . && echo '${conf.name}.${conf.version}' > version`
-					);
+					// await runShell(
+					// 	`mkdir -p ${dest} && cd ${dest} && tar -zcf ${conf.name}.${conf.version}.tar.gz -C ${output} . && echo '${conf.name}.${conf.version}' > version`
+					// );
 				}
 			}
 		]);

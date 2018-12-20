@@ -193,25 +193,25 @@ var Kgr = function () {
 			var version = conf.version;
 			var source = this.getArgs().source || '.source';
 			source = (0, _core.getAbsPath)(source);
-			source = _path2.default.resolve(source, conf.name, version);
+			source = _path2.default.resolve(source, version);
 			return source;
 		}
-	}, {
-		key: 'destPath',
-		value: function destPath(conf) {
-			var version = conf.version;
-			var dest = this.getArgs().dest || 'dest';
-			dest = (0, _core.getAbsPath)(dest);
-			dest = _path2.default.resolve(dest);
-			return dest;
-		}
+
+		// destPath(conf) {
+		// 	let version = conf.version;
+		// 	let dest = this.getArgs().dest || 'dest';
+		// 	dest = getAbsPath(dest);
+		// 	dest = path.resolve(dest);
+		// 	return dest;
+		// }
+
 	}, {
 		key: 'outputPath',
 		value: function outputPath(conf) {
 			var version = conf.version;
 			var output = this.getArgs().output || 'output';
 			output = (0, _core.getAbsPath)(output);
-			output = _path2.default.resolve(output, conf.name, version);
+			output = _path2.default.resolve(output);
 			return output;
 		}
 	}, {
@@ -233,7 +233,7 @@ var Kgr = function () {
 								source = this.sourcePath(conf);
 								output = this.outputPath(conf);
 								successFile = '.kgr_success';
-								versionFile = '.kgr_version_' + conf.name + '_' + conf.version;
+								versionFile = '.kgr_version_' + conf.version;
 								tarName = conf.name + '-' + version + '.tar.gz';
 
 								_init = function () {
@@ -310,7 +310,7 @@ var Kgr = function () {
 													case 0:
 														log('cp start');
 														_context2.next = 3;
-														return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && tar -zxf ' + _path2.default.resolve(source, tarName) + ' && echo \'' + conf.name + ':' + version + '\' > ' + versionFile);
+														return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && tar -zxf ' + _path2.default.resolve(source, tarName) + ' && echo \'' + version + '\' > ' + versionFile);
 
 													case 3:
 														log('cp end');
@@ -462,7 +462,7 @@ var Kgr = function () {
 						var cleanFiles = _globby2.default.sync(glob, { base: output, cwd: output });
 						log('sourceFiles ' + (0, _stringify2.default)(sourceFiles));
 						log('cleanFiles ' + (0, _stringify2.default)(cleanFiles));
-						var versionFile = '.kgr_version_' + conf.name + '_' + conf.version;
+						var versionFile = '.kgr_version_' + conf.version;
 						//删除时清除缓存 , 以便下次重建
 						var matchedClean = (0, _core.clean)(sourceFiles, cleanFiles);
 						(0, _each3.default)(matchedClean, function (file) {
@@ -743,7 +743,7 @@ var Kgr = function () {
 										}
 									}, _callee10, _this5);
 								})), (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11() {
-									var conf, output, dest;
+									var conf, output;
 									return _regenerator2.default.wrap(function _callee11$(_context11) {
 										while (1) {
 											switch (_context11.prev = _context11.next) {
@@ -755,35 +755,35 @@ var Kgr = function () {
 												case 3:
 													conf = _this5.configForName(name);
 													output = _this5.outputPath(conf);
-													dest = _this5.destPath(conf);
+													// let dest = this.destPath(conf);
 
 													if (_fs2.default.existsSync(output)) {
-														_context11.next = 8;
+														_context11.next = 7;
 														break;
 													}
 
 													return _context11.abrupt('return');
 
-												case 8:
+												case 7:
 													if (!conf.build) {
-														_context11.next = 13;
+														_context11.next = 10;
 														break;
 													}
 
-													_context11.next = 11;
+													_context11.next = 10;
 													return _promise2.default.all(conf.build, { cwd: output });
 
-												case 11:
-													_context11.next = 13;
-													return (0, _core.runShell)('mkdir -p ' + dest + ' && cd ' + dest + ' && tar -zcf ' + conf.name + '.' + conf.version + '.tar.gz -C ' + output + ' . && echo \'' + conf.name + '.' + conf.version + '\' > version');
-
-												case 13:
+												case 10:
 												case 'end':
 													return _context11.stop();
 											}
 										}
 									}, _callee11, _this5);
-								}))]);
+								}))]
+								// await runShell(
+								// 	`mkdir -p ${dest} && cd ${dest} && tar -zcf ${conf.name}.${conf.version}.tar.gz -C ${output} . && echo '${conf.name}.${conf.version}' > version`
+								// );
+								);
 
 							case 2:
 							case 'end':
