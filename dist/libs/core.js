@@ -1,7 +1,7 @@
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+	value: true
 });
 exports.clean = exports.getExistsReplace = exports.getFiles = exports.gulpCUD = exports.findDependen = exports.tasks = exports.runShell = exports.getAbsPath = undefined;
 
@@ -58,68 +58,68 @@ var _isArray2 = require('lodash/isArray');
 var _isArray3 = _interopRequireDefault(_isArray2);
 
 var tasks = function () {
-    var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(processes) {
-        var data, work;
-        return _regenerator2.default.wrap(function _callee2$(_context2) {
-            while (1) {
-                switch (_context2.prev = _context2.next) {
-                    case 0:
-                        if ((0, _isArray3.default)(processes)) {
-                            _context2.next = 2;
-                            break;
-                        }
+	var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(processes) {
+		var data, work;
+		return _regenerator2.default.wrap(function _callee2$(_context2) {
+			while (1) {
+				switch (_context2.prev = _context2.next) {
+					case 0:
+						if ((0, _isArray3.default)(processes)) {
+							_context2.next = 2;
+							break;
+						}
 
-                        return _context2.abrupt('return');
+						return _context2.abrupt('return');
 
-                    case 2:
-                        data = null;
+					case 2:
+						data = null;
 
-                    case 3:
-                        work = processes.shift();
+					case 3:
+						work = processes.shift();
 
-                        if ((0, _isFunction3.default)(work)) {
-                            _context2.next = 6;
-                            break;
-                        }
+						if ((0, _isFunction3.default)(work)) {
+							_context2.next = 6;
+							break;
+						}
 
-                        return _context2.abrupt('continue', 15);
+						return _context2.abrupt('continue', 15);
 
-                    case 6:
-                        _context2.prev = 6;
-                        _context2.next = 9;
-                        return work(data);
+					case 6:
+						_context2.prev = 6;
+						_context2.next = 9;
+						return work(data);
 
-                    case 9:
-                        data = _context2.sent;
-                        _context2.next = 15;
-                        break;
+					case 9:
+						data = _context2.sent;
+						_context2.next = 15;
+						break;
 
-                    case 12:
-                        _context2.prev = 12;
-                        _context2.t0 = _context2['catch'](6);
+					case 12:
+						_context2.prev = 12;
+						_context2.t0 = _context2['catch'](6);
 
-                        console.error(_context2.t0);
+						console.error(_context2.t0);
 
-                    case 15:
-                        if (processes.length) {
-                            _context2.next = 3;
-                            break;
-                        }
+					case 15:
+						if (processes.length) {
+							_context2.next = 3;
+							break;
+						}
 
-                    case 16:
-                        return _context2.abrupt('return', data);
+					case 16:
+						return _context2.abrupt('return', data);
 
-                    case 17:
-                    case 'end':
-                        return _context2.stop();
-                }
-            }
-        }, _callee2, this, [[6, 12]]);
-    }));
+					case 17:
+					case 'end':
+						return _context2.stop();
+				}
+			}
+		}, _callee2, this, [[6, 12]]);
+	}));
 
-    return function tasks(_x3) {
-        return _ref2.apply(this, arguments);
-    };
+	return function tasks(_x3) {
+		return _ref2.apply(this, arguments);
+	};
 }();
 
 var _path = require('path');
@@ -173,192 +173,193 @@ var log = (0, _debug2.default)(_package2.default.name + ':core');
 var noop = function noop() {};
 
 var findDependen = function () {
-    var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(files) {
-        var result, _loop, _ret;
+	var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(files) {
+		var result, _loop, _ret;
 
-        return _regenerator2.default.wrap(function _callee$(_context) {
-            while (1) {
-                switch (_context.prev = _context.next) {
-                    case 0:
-                        if (!(0, _isArray3.default)(files)) {
-                            files = [files];
-                        }
-                        result = [];
+		return _regenerator2.default.wrap(function _callee$(_context) {
+			while (1) {
+				switch (_context.prev = _context.next) {
+					case 0:
+						if (!(0, _isArray3.default)(files)) {
+							files = [files];
+						}
+						result = [];
 
-                        _loop = function _loop() {
-                            var file = files.shift();
-                            if (_path2.default.extname(file) === '') {
-                                files.push('' + _path2.default.resolve(file, 'index.js'));
-                                files.push(file + '.js');
-                                return 'continue';
-                            }
-                            if (!_fs2.default.existsSync(file)) {
-                                return 'continue';
-                            }
-                            var stat = _fs2.default.statSync(file);
+						_loop = function _loop() {
+							var file = files.shift();
+							if (_path2.default.extname(file) === '') {
+								files.push('' + _path2.default.resolve(file, 'index.js'));
+								files.push(file + '.js');
+								return 'continue';
+							}
+							if (!_fs2.default.existsSync(file)) {
+								return 'continue';
+							}
+							var stat = _fs2.default.statSync(file);
 
-                            if (!stat.isFile() || !/\.js$/.test(file)) {
-                                return 'continue';
-                            }
-                            var content = _fs2.default.readFileSync(file, 'utf8');
+							if (!stat.isFile() || !/\.js$/.test(file)) {
+								return 'continue';
+							}
+							var content = _fs2.default.readFileSync(file, 'utf8');
 
-                            result.push(file);
-                            var dep = (0, _map3.default)((0, _detectImportRequire2.default)(content), function (f) {
-                                return getAbsPath(f, _path2.default.dirname(file));
-                            });
-                            files = files.concat(dep);
-                        };
+							result.push(file);
+							var dep = (0, _map3.default)((0, _detectImportRequire2.default)(content), function (f) {
+								return getAbsPath(f, _path2.default.dirname(file));
+							});
+							files = files.concat(dep);
+						};
 
-                    case 3:
-                        if (!files.length) {
-                            _context.next = 9;
-                            break;
-                        }
+					case 3:
+						if (!files.length) {
+							_context.next = 9;
+							break;
+						}
 
-                        _ret = _loop();
+						_ret = _loop();
 
-                        if (!(_ret === 'continue')) {
-                            _context.next = 7;
-                            break;
-                        }
+						if (!(_ret === 'continue')) {
+							_context.next = 7;
+							break;
+						}
 
-                        return _context.abrupt('continue', 3);
+						return _context.abrupt('continue', 3);
 
-                    case 7:
-                        _context.next = 3;
-                        break;
+					case 7:
+						_context.next = 3;
+						break;
 
-                    case 9:
-                        return _context.abrupt('return', result);
+					case 9:
+						return _context.abrupt('return', result);
 
-                    case 10:
-                    case 'end':
-                        return _context.stop();
-                }
-            }
-        }, _callee, undefined);
-    }));
+					case 10:
+					case 'end':
+						return _context.stop();
+				}
+			}
+		}, _callee, undefined);
+	}));
 
-    return function findDependen(_x) {
-        return _ref.apply(this, arguments);
-    };
+	return function findDependen(_x) {
+		return _ref.apply(this, arguments);
+	};
 }();
 
 function getAbsPath(output, base) {
-    var isAbs = _path2.default.isAbsolute(output);
-    base = base || process.cwd();
-    log('base cwd ' + base);
-    output = isAbs ? output : _path2.default.resolve(base, output);
-    return output;
+	var isAbs = _path2.default.isAbsolute(output);
+	base = base || process.cwd();
+	log('base cwd ' + base);
+	output = isAbs ? output : _path2.default.resolve(base, output);
+	return output;
 }
 
 function runShell(cmd) {
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-    if (!cmd) {
-        return;
-    }
-    console.log(_chalk2.default.green('run shell cmd : ' + cmd));
-    var child = (0, _execa2.default)(cmd, (0, _extends3.default)({
-        shell: true,
-        maxBuffer: 1000000000,
-        env: (0, _extends3.default)({
-            FORCE_COLOR: true,
-            COLOR: 'always',
-            NPM_CONFIG_COLOR: 'always'
-        }, process.env, options.env || {})
-    }, options));
-    child.stdout.pipe(process.stdout);
-    child.stderr.pipe(process.stderr);
-    return child.then(function (child) {
-        return child;
-    }).catch(function (e) {
-        throw e;
-    });
+	if (!cmd) {
+		return;
+	}
+	console.log(_chalk2.default.green('run shell cmd : ' + cmd));
+	var child = (0, _execa2.default)(cmd, (0, _extends3.default)({
+		shell: true,
+		maxBuffer: 1000000000,
+		// stdio: [ 0, 1, 2 ],
+		env: (0, _extends3.default)({
+			FORCE_COLOR: true,
+			COLOR: 'always',
+			NPM_CONFIG_COLOR: 'always'
+		}, process.env, options.env || {})
+	}, options));
+	child.stdout.pipe(process.stdout);
+	child.stderr.pipe(process.stderr);
+	return child.then(function (child) {
+		return child;
+	}).catch(function (e) {
+		throw e;
+	});
 }
 
 function getExistsReplace(replaces, source) {
-    var files = [];
-    (0, _each3.default)(replaces, function (value, key) {
-        if (!(0, _isString3.default)(value) || !(0, _isString3.default)(key)) {
-            return;
-        }
-        value = !value ? value : getAbsPath(value, source);
-        if (value && _fs2.default.existsSync(value)) {
-            files.push(value);
-        }
-    });
-    return files;
+	var files = [];
+	(0, _each3.default)(replaces, function (value, key) {
+		if (!(0, _isString3.default)(value) || !(0, _isString3.default)(key)) {
+			return;
+		}
+		value = !value ? value : getAbsPath(value, source);
+		if (value && _fs2.default.existsSync(value)) {
+			files.push(value);
+		}
+	});
+	return files;
 }
 
 function getFiles(replaces, source, matched) {
-    var files = {
-        add: [],
-        replace: []
-    };
-    (0, _forEach3.default)(replaces, function (value, key) {
-        if (!(0, _isString3.default)(value) || !(0, _isString3.default)(key)) {
-            return;
-        }
-        var source = !value ? undefined : getAbsPath(value, source);
-        if (!source || !_fs2.default.existsSync(source)) {
-            return;
-        }
-        var _find = (0, _find4.default)(matched, function (_match) {
-            return _match === key;
-        });
-        if (_find) {
-            files.replace.push({
-                source: source,
-                target: key
-            });
-        } else {
-            files.add.push({
-                source: source,
-                target: key
-            });
-        }
-    });
-    return files;
+	var files = {
+		add: [],
+		replace: []
+	};
+	(0, _forEach3.default)(replaces, function (value, key) {
+		if (!(0, _isString3.default)(value) || !(0, _isString3.default)(key)) {
+			return;
+		}
+		var source = !value ? undefined : getAbsPath(value, source);
+		if (!source || !_fs2.default.existsSync(source)) {
+			return;
+		}
+		var _find = (0, _find4.default)(matched, function (_match) {
+			return _match === key;
+		});
+		if (_find) {
+			files.replace.push({
+				source: source,
+				target: key
+			});
+		} else {
+			files.add.push({
+				source: source,
+				target: key
+			});
+		}
+	});
+	return files;
 }
 
 function gulpCUD(files, source) {
-    var stream = _through2.default.obj(function (file, enc, cb) {
-        var _relative = file.relative;
-        var find = (0, _find4.default)(files.replace, function (_file) {
-            return _file.target === _relative;
-        });
-        if (find) {
-            var content = _fs2.default.readFileSync(find.source);
-            file.contents = content;
-            file.__changed = true;
-        }
-        this.push(file);
-        cb();
-    });
-    log('add files ' + (0, _stringify2.default)(files.add));
-    log('replace files ' + (0, _stringify2.default)(files.replace));
-    (0, _each3.default)(files.add, function (add) {
-        var content = _fs2.default.readFileSync(add.source);
-        var vl = new _vinyl2.default({
-            cwd: source,
-            base: source,
-            path: '' + _path2.default.resolve(source, add.target),
-            contents: content
-        });
-        vl.__new = true;
-        stream.push(vl);
-    });
-    return stream;
+	var stream = _through2.default.obj(function (file, enc, cb) {
+		var _relative = file.relative;
+		var find = (0, _find4.default)(files.replace, function (_file) {
+			return _file.target === _relative;
+		});
+		if (find) {
+			var content = _fs2.default.readFileSync(find.source);
+			file.contents = content;
+			file.__changed = true;
+		}
+		this.push(file);
+		cb();
+	});
+	log('add files ' + (0, _stringify2.default)(files.add));
+	log('replace files ' + (0, _stringify2.default)(files.replace));
+	(0, _each3.default)(files.add, function (add) {
+		var content = _fs2.default.readFileSync(add.source);
+		var vl = new _vinyl2.default({
+			cwd: source,
+			base: source,
+			path: '' + _path2.default.resolve(source, add.target),
+			contents: content
+		});
+		vl.__new = true;
+		stream.push(vl);
+	});
+	return stream;
 }
 
 function clean(exists, cleanFiles) {
-    var existMap = (0, _keyBy3.default)(exists, function (exist) {
-        return exist;
-    });
-    return (0, _filter3.default)(cleanFiles, function (file) {
-        return !existMap[file];
-    });
+	var existMap = (0, _keyBy3.default)(exists, function (exist) {
+		return exist;
+	});
+	return (0, _filter3.default)(cleanFiles, function (file) {
+		return !existMap[file];
+	});
 }
 
 exports.getAbsPath = getAbsPath;

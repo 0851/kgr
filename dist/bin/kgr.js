@@ -22,7 +22,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _commander2.default.version(_package2.default.version).option('-c, --config [config]', 'config file \',\' separated, glob mode', function (val) {
     return val.split(',');
-}).option('-o, --output [output]', 'output path', 'dist').option('-s, --source [source]', 'tmp path', '.source').option('-m, --mode [mode]', 'run project mode , default dev', 'dev').option('-n, --name [name]', 'run project name , default find first name in config file', '').option('--init [init]', 'init project', '').option('--copy [copy]', 'copy project', '').parse(process.argv);
+}).option('-o, --output [output]', 'output path , dev tmp path', 'output').option('-d, --dest [dest]', 'dest path', 'dest').option('-s, --source [source]', 'source path', '.source').option('-m, --mode [mode]', 'run project mode , default dev', 'dev').option('-n, --name [name]', 'run project name , default find first name in config file', '').option('--init [init]', 'init project', '').option('--copy [copy]', 'copy project', '').parse(process.argv);
 
 exports.default = new _index2.default(_commander2.default).run();
 module.exports = exports.default;

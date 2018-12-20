@@ -9,8 +9,9 @@ commander
     .option('-c, --config [config]', 'config file \',\' separated, glob mode', val => {
         return val.split(',');
     })
-    .option('-o, --output [output]', 'output path', 'dist')
-    .option('-s, --source [source]', 'tmp path', '.source')
+    .option('-o, --output [output]', 'output path , dev tmp path', 'output')
+    .option('-d, --dest [dest]', 'dest path', 'dest')
+    .option('-s, --source [source]', 'source path', '.source')
     .option('-m, --mode [mode]', 'run project mode , default dev', 'dev')
     .option('-n, --name [name]', 'run project name , default find first name in config file', '')
     .option('--init [init]', 'init project', '')

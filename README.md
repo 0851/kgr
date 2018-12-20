@@ -11,7 +11,8 @@ Usage: kgr [options]
 Options:
   -V, --version          output the version number
   -c, --config [config]  config file ',' separated, glob mode
-  -o, --output [output]  output path (default: "dist")
+  -o, --output [output]  output path (default: "output")
+  -d, --dest   [dest]    dest path (default: "dest")
   -s, --source [source]  source path (default: ".source")
   -m, --mode [mode]      run project mode , default dev (default: "dev")
   -n, --name [name]      run project name , default find first name in config file (default: "")
@@ -59,13 +60,13 @@ module.exports = function () {
         {
             //项目名 , 如没有output参数时,做导出目录的目录名
             name: 'components',
-            //需要执行的初始化命令
-            init: 'npm install lodash --verbose',
-            //启动命令 ,mode dev时执行
+            //需要执行的初始化命令 , 支持数组 , 多命令并行 , 数组内部 第二个 为传递给shell 的参数 可用来指定执行目录等, 目录会添加输出目录作为根目录
+            bash: ['npm install lodash --verbose',['npm install lodash --verbose',{cwd:'v1'}]],
+            //启动命令 ,mode dev时执行 支持数组 , 多命令并行 , 数组内部 第二个 为传递给shell 的参数 可用来指定执行目录等, 目录会添加输出目录作为根目录
             start: 'ls',
-            //文件改变后命令 , 空代表改变文件后不触发操作 , mode dev 时执行
+            //文件改变后命令 , 空代表改变文件后不触发操作 , mode dev 时执行 支持数组 , 多命令并行 , 数组内部 第二个 为传递给shell 的参数 可用来指定执行目录等, 目录会添加输出目录作为根目录
             restart: 'ls -l',
-            //构建命令 ,mode build时执行
+            //构建命令 ,mode build时执行 支持数组 , 多命令并行 , 数组内部 第二个 为传递给shell 的参数 可用来指定执行目录等, 目录会添加输出目录作为根目录
             build:'',
             //git 地址
             remote: 'http://xxxx/xxxx/xxx.git',
