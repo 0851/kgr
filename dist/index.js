@@ -130,7 +130,7 @@ var log = (0, _debug2.default)(_package2.default.name);
 
 function generateShells(bash, config, root) {
 	if (!(0, _isArray3.default)(bash)) {
-		bash = bash;
+		bash = [bash];
 	}
 	var shells = (0, _reduce3.default)(bash, function (res, b) {
 		if ((0, _isString3.default)(b)) {

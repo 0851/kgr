@@ -22,7 +22,7 @@ const log = debug(pkg.name);
 
 function generateShells(bash, config, root) {
 	if (!_.isArray(bash)) {
-		bash = bash;
+		bash = [bash];
 	}
 	const shells = _.reduce(
 		bash,
