@@ -1,0 +1,8 @@
+
+.vscode/
+.idea/
+.cache/
+node_modules/
+.babelrc
+.__source
+.history
