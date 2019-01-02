@@ -4,13 +4,13 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _regenerator = require('babel-runtime/regenerator');
-
-var _regenerator2 = _interopRequireDefault(_regenerator);
-
 var _promise = require('babel-runtime/core-js/promise');
 
 var _promise2 = _interopRequireDefault(_promise);
+
+var _regenerator = require('babel-runtime/regenerator');
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
 
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
@@ -217,14 +217,14 @@ var Kgr = function () {
 	}, {
 		key: 'init',
 		value: function () {
-			var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(name) {
+			var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(name) {
 				var _this = this;
 
-				var conf, args, url, version, source, output, successFile, versionFile, tarName, _init, _copyOutput;
+				var conf, args, url, version, source, output, successFile, versionFile, tarName, tar, _init, _copyOutput;
 
-				return _regenerator2.default.wrap(function _callee3$(_context3) {
+				return _regenerator2.default.wrap(function _callee4$(_context4) {
 					while (1) {
-						switch (_context3.prev = _context3.next) {
+						switch (_context4.prev = _context4.next) {
 							case 0:
 								conf = this.configForName(name);
 								args = this.getArgs();
@@ -236,42 +236,16 @@ var Kgr = function () {
 								versionFile = '.kgr_version_' + conf.version;
 								tarName = conf.name + '-' + version + '.tar.gz';
 
-								_init = function () {
+								tar = function () {
 									var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
-										var _ref3, stdout, stderr;
-
 										return _regenerator2.default.wrap(function _callee$(_context) {
 											while (1) {
 												switch (_context.prev = _context.next) {
 													case 0:
 														_context.next = 2;
-														return (0, _core.runShell)('git version');
+														return (0, _core.runShell)('cd ' + source + ' && b=' + tarName + '; tar --exclude=$b --exclude .git --exclude ' + successFile + ' -zcf $b . && echo \'success\' > ' + successFile);
 
 													case 2:
-														_ref3 = _context.sent;
-														stdout = _ref3.stdout;
-														stderr = _ref3.stderr;
-
-														if (/version/.test(stdout)) {
-															_context.next = 7;
-															break;
-														}
-
-														throw new Error('please install git on your pc');
-
-													case 7:
-														_context.next = 9;
-														return (0, _core.runShell)('rm -rf ' + source + ' && git clone --depth=1 -b ' + version + ' ' + url + ' ' + source + ' && cd ' + source);
-
-													case 9:
-														_context.next = 11;
-														return _promise2.default.all(generateShells(conf.bash, null, source));
-
-													case 11:
-														_context.next = 13;
-														return (0, _core.runShell)('cd ' + source + ' && b=' + tarName + '; tar --exclude=$b --exclude .git -zcf $b . && echo \'success\' > ' + successFile);
-
-													case 13:
 													case 'end':
 														return _context.stop();
 												}
@@ -279,43 +253,47 @@ var Kgr = function () {
 										}, _callee, _this);
 									}));
 
-									return function _init() {
+									return function tar() {
 										return _ref2.apply(this, arguments);
 									};
 								}();
 
-								if (!args.init) {
-									_context3.next = 13;
-									break;
-								}
+								_init = function () {
+									var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
+										var _ref4, stdout, stderr;
 
-								_context3.next = 13;
-								return _init();
-
-							case 13:
-								if (_fs2.default.existsSync(_path2.default.resolve(source, successFile))) {
-									_context3.next = 16;
-									break;
-								}
-
-								_context3.next = 16;
-								return _init();
-
-							case 16:
-								_copyOutput = function () {
-									var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
 										return _regenerator2.default.wrap(function _callee2$(_context2) {
 											while (1) {
 												switch (_context2.prev = _context2.next) {
 													case 0:
-														log('cp start');
-														_context2.next = 3;
-														return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && tar -zxf ' + _path2.default.resolve(source, tarName) + ' && echo \'' + version + '\' > ' + versionFile);
+														_context2.next = 2;
+														return (0, _core.runShell)('git version');
 
-													case 3:
-														log('cp end');
+													case 2:
+														_ref4 = _context2.sent;
+														stdout = _ref4.stdout;
+														stderr = _ref4.stderr;
 
-													case 4:
+														if (/version/.test(stdout)) {
+															_context2.next = 7;
+															break;
+														}
+
+														throw new Error('please install git on your pc');
+
+													case 7:
+														_context2.next = 9;
+														return (0, _core.runShell)('rm -rf ' + source + ' && git clone --depth=1 -b ' + version + ' ' + url + ' ' + source + ' && cd ' + source);
+
+													case 9:
+														_context2.next = 11;
+														return _promise2.default.all(generateShells(conf.bash, null, source));
+
+													case 11:
+														_context2.next = 13;
+														return tar();
+
+													case 13:
 													case 'end':
 														return _context2.stop();
 												}
@@ -323,37 +301,103 @@ var Kgr = function () {
 										}, _callee2, _this);
 									}));
 
+									return function _init() {
+										return _ref3.apply(this, arguments);
+									};
+								}();
+
+								if (!args.init) {
+									_context4.next = 14;
+									break;
+								}
+
+								_context4.next = 14;
+								return _init();
+
+							case 14:
+								if (!args.repull) {
+									_context4.next = 19;
+									break;
+								}
+
+								_context4.next = 17;
+								return (0, _core.runShell)('cd ' + source + ' && git pull');
+
+							case 17:
+								_context4.next = 19;
+								return tar();
+
+							case 19:
+								if (!args.retar) {
+									_context4.next = 22;
+									break;
+								}
+
+								_context4.next = 22;
+								return tar();
+
+							case 22:
+								if (_fs2.default.existsSync(_path2.default.resolve(source, successFile))) {
+									_context4.next = 25;
+									break;
+								}
+
+								_context4.next = 25;
+								return _init();
+
+							case 25:
+								_copyOutput = function () {
+									var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
+										return _regenerator2.default.wrap(function _callee3$(_context3) {
+											while (1) {
+												switch (_context3.prev = _context3.next) {
+													case 0:
+														log('cp start');
+														_context3.next = 3;
+														return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && tar -zxf ' + _path2.default.resolve(source, tarName) + ' && echo \'' + version + '\' > ' + versionFile);
+
+													case 3:
+														log('cp end');
+
+													case 4:
+													case 'end':
+														return _context3.stop();
+												}
+											}
+										}, _callee3, _this);
+									}));
+
 									return function _copyOutput() {
-										return _ref4.apply(this, arguments);
+										return _ref5.apply(this, arguments);
 									};
 								}();
 
 								if (!args.copy) {
-									_context3.next = 20;
+									_context4.next = 29;
 									break;
 								}
 
-								_context3.next = 20;
+								_context4.next = 29;
 								return _copyOutput();
 
-							case 20:
+							case 29:
 								if (_fs2.default.existsSync(_path2.default.resolve(output, '' + versionFile))) {
-									_context3.next = 23;
+									_context4.next = 32;
 									break;
 								}
 
-								_context3.next = 23;
+								_context4.next = 32;
 								return _copyOutput();
 
-							case 23:
-								return _context3.abrupt('return', conf);
+							case 32:
+								return _context4.abrupt('return', conf);
 
-							case 24:
+							case 33:
 							case 'end':
-								return _context3.stop();
+								return _context4.stop();
 						}
 					}
-				}, _callee3, this);
+				}, _callee4, this);
 			}));
 
 			function init(_x) {
@@ -492,46 +536,46 @@ var Kgr = function () {
 	}, {
 		key: 'devServer',
 		value: function () {
-			var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(name) {
+			var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(name) {
 				var _this3 = this;
 
 				var bash, watch, conf, output;
-				return _regenerator2.default.wrap(function _callee6$(_context6) {
+				return _regenerator2.default.wrap(function _callee7$(_context7) {
 					while (1) {
-						switch (_context6.prev = _context6.next) {
+						switch (_context7.prev = _context7.next) {
 							case 0:
 								bash = null;
 
 								watch = function () {
-									var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5() {
+									var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6() {
 										var _conf2, files;
 
-										return _regenerator2.default.wrap(function _callee5$(_context5) {
+										return _regenerator2.default.wrap(function _callee6$(_context6) {
 											while (1) {
-												switch (_context5.prev = _context5.next) {
+												switch (_context6.prev = _context6.next) {
 													case 0:
-														_context5.prev = 0;
+														_context6.prev = 0;
 														_conf2 = _this3.configForName(name);
-														_context5.next = 4;
+														_context6.next = 4;
 														return (0, _core.findDependen)(_conf2.__filename);
 
 													case 4:
-														files = _context5.sent;
+														files = _context6.sent;
 
 														files = files.concat((0, _core.getExistsReplace)(_conf2.replace, _path2.default.dirname(_conf2.__filename)));
 														log('watch start ... , ' + files);
 														_gulp3.default.watch(files, function () {
-															var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(event) {
+															var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(event) {
 																var _conf3, _output;
 
-																return _regenerator2.default.wrap(function _callee4$(_context4) {
+																return _regenerator2.default.wrap(function _callee5$(_context5) {
 																	while (1) {
-																		switch (_context4.prev = _context4.next) {
+																		switch (_context5.prev = _context5.next) {
 																			case 0:
-																				_context4.prev = 0;
+																				_context5.prev = 0;
 
 																				console.log('' + _chalk2.default.yellow('File ' + event.path + ' was ' + event.type + ' , running tasks...'));
-																				_context4.next = 4;
+																				_context5.next = 4;
 																				return _this3.gulp(name);
 
 																			case 4:
@@ -539,7 +583,7 @@ var Kgr = function () {
 																				_output = _this3.outputPath(_conf3);
 
 																				if (_fs2.default.existsSync(_output)) {
-																					_context4.next = 8;
+																					_context5.next = 8;
 																					break;
 																				}
 
@@ -547,7 +591,7 @@ var Kgr = function () {
 
 																			case 8:
 																				if (!_conf3.restart) {
-																					_context4.next = 14;
+																					_context5.next = 14;
 																					break;
 																				}
 
@@ -558,56 +602,56 @@ var Kgr = function () {
 																				}
 																				bash = generateShells(_conf3.restart, null, _output);
 																				console.log('' + _chalk2.default.green.underline('restart : ' + _output));
-																				_context4.next = 14;
+																				_context5.next = 14;
 																				return _promise2.default.all(bash);
 
 																			case 14:
 																				console.log('' + _chalk2.default.green.underline('restart : ' + _output));
-																				_context4.next = 20;
+																				_context5.next = 20;
 																				break;
 
 																			case 17:
-																				_context4.prev = 17;
-																				_context4.t0 = _context4['catch'](0);
+																				_context5.prev = 17;
+																				_context5.t0 = _context5['catch'](0);
 
-																				console.error(_context4.t0);
+																				console.error(_context5.t0);
 
 																			case 20:
 																			case 'end':
-																				return _context4.stop();
+																				return _context5.stop();
 																		}
 																	}
-																}, _callee4, _this3, [[0, 17]]);
+																}, _callee5, _this3, [[0, 17]]);
 															}));
 
 															return function (_x3) {
-																return _ref7.apply(this, arguments);
+																return _ref8.apply(this, arguments);
 															};
 														}());
-														_context5.next = 13;
+														_context6.next = 13;
 														break;
 
 													case 10:
-														_context5.prev = 10;
-														_context5.t0 = _context5['catch'](0);
+														_context6.prev = 10;
+														_context6.t0 = _context6['catch'](0);
 
-														console.error(_context5.t0);
+														console.error(_context6.t0);
 
 													case 13:
 													case 'end':
-														return _context5.stop();
+														return _context6.stop();
 												}
 											}
-										}, _callee5, _this3, [[0, 10]]);
+										}, _callee6, _this3, [[0, 10]]);
 									}));
 
 									return function watch() {
-										return _ref6.apply(this, arguments);
+										return _ref7.apply(this, arguments);
 									};
 								}();
 
 								this.cache = {};
-								_context6.next = 5;
+								_context7.next = 5;
 								return this.gulp(name);
 
 							case 5:
@@ -615,25 +659,25 @@ var Kgr = function () {
 								output = this.outputPath(conf);
 
 								if (_fs2.default.existsSync(output)) {
-									_context6.next = 9;
+									_context7.next = 9;
 									break;
 								}
 
 								throw new Error('cann\'t fount output path ' + output);
 
 							case 9:
-								_context6.next = 11;
+								_context7.next = 11;
 								return watch();
 
 							case 11:
 								if (!conf.start) {
-									_context6.next = 16;
+									_context7.next = 16;
 									break;
 								}
 
 								bash = generateShells(conf.start, null, output);
 								console.log('' + _chalk2.default.green.underline('success : ' + output));
-								_context6.next = 16;
+								_context7.next = 16;
 								return _promise2.default.all(bash);
 
 							case 16:
@@ -641,14 +685,14 @@ var Kgr = function () {
 
 							case 17:
 							case 'end':
-								return _context6.stop();
+								return _context7.stop();
 						}
 					}
-				}, _callee6, this);
+				}, _callee7, this);
 			}));
 
 			function devServer(_x2) {
-				return _ref5.apply(this, arguments);
+				return _ref6.apply(this, arguments);
 			}
 
 			return devServer;
@@ -656,38 +700,21 @@ var Kgr = function () {
 	}, {
 		key: 'dev',
 		value: function () {
-			var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(name) {
+			var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10(name) {
 				var _this4 = this;
 
-				return _regenerator2.default.wrap(function _callee9$(_context9) {
+				return _regenerator2.default.wrap(function _callee10$(_context10) {
 					while (1) {
-						switch (_context9.prev = _context9.next) {
+						switch (_context10.prev = _context10.next) {
 							case 0:
-								_context9.next = 2;
-								return (0, _core.tasks)([(0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7() {
-									return _regenerator2.default.wrap(function _callee7$(_context7) {
-										while (1) {
-											switch (_context7.prev = _context7.next) {
-												case 0:
-													_context7.next = 2;
-													return _this4.init(name);
-
-												case 2:
-													return _context7.abrupt('return', _context7.sent);
-
-												case 3:
-												case 'end':
-													return _context7.stop();
-											}
-										}
-									}, _callee7, _this4);
-								})), (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8() {
+								_context10.next = 2;
+								return (0, _core.tasks)([(0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8() {
 									return _regenerator2.default.wrap(function _callee8$(_context8) {
 										while (1) {
 											switch (_context8.prev = _context8.next) {
 												case 0:
 													_context8.next = 2;
-													return _this4.devServer(name);
+													return _this4.init(name);
 
 												case 2:
 													return _context8.abrupt('return', _context8.sent);
@@ -698,18 +725,35 @@ var Kgr = function () {
 											}
 										}
 									}, _callee8, _this4);
+								})), (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9() {
+									return _regenerator2.default.wrap(function _callee9$(_context9) {
+										while (1) {
+											switch (_context9.prev = _context9.next) {
+												case 0:
+													_context9.next = 2;
+													return _this4.devServer(name);
+
+												case 2:
+													return _context9.abrupt('return', _context9.sent);
+
+												case 3:
+												case 'end':
+													return _context9.stop();
+											}
+										}
+									}, _callee9, _this4);
 								}))]);
 
 							case 2:
 							case 'end':
-								return _context9.stop();
+								return _context10.stop();
 						}
 					}
-				}, _callee9, this);
+				}, _callee10, this);
 			}));
 
 			function dev(_x4) {
-				return _ref8.apply(this, arguments);
+				return _ref9.apply(this, arguments);
 			}
 
 			return dev;
@@ -717,39 +761,39 @@ var Kgr = function () {
 	}, {
 		key: 'build',
 		value: function () {
-			var _ref11 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12(name) {
+			var _ref12 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13(name) {
 				var _this5 = this;
 
-				return _regenerator2.default.wrap(function _callee12$(_context12) {
+				return _regenerator2.default.wrap(function _callee13$(_context13) {
 					while (1) {
-						switch (_context12.prev = _context12.next) {
+						switch (_context13.prev = _context13.next) {
 							case 0:
-								_context12.next = 2;
-								return (0, _core.tasks)([(0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee10() {
-									return _regenerator2.default.wrap(function _callee10$(_context10) {
-										while (1) {
-											switch (_context10.prev = _context10.next) {
-												case 0:
-													_context10.next = 2;
-													return _this5.init(name);
-
-												case 2:
-													return _context10.abrupt('return', _context10.sent);
-
-												case 3:
-												case 'end':
-													return _context10.stop();
-											}
-										}
-									}, _callee10, _this5);
-								})), (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11() {
-									var conf, output;
+								_context13.next = 2;
+								return (0, _core.tasks)([(0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee11() {
 									return _regenerator2.default.wrap(function _callee11$(_context11) {
 										while (1) {
 											switch (_context11.prev = _context11.next) {
 												case 0:
+													_context11.next = 2;
+													return _this5.init(name);
+
+												case 2:
+													return _context11.abrupt('return', _context11.sent);
+
+												case 3:
+												case 'end':
+													return _context11.stop();
+											}
+										}
+									}, _callee11, _this5);
+								})), (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee12() {
+									var conf, output;
+									return _regenerator2.default.wrap(function _callee12$(_context12) {
+										while (1) {
+											switch (_context12.prev = _context12.next) {
+												case 0:
 													_this5.cache = {};
-													_context11.next = 3;
+													_context12.next = 3;
 													return _this5.gulp(name);
 
 												case 3:
@@ -758,27 +802,27 @@ var Kgr = function () {
 													// let dest = this.destPath(conf);
 
 													if (_fs2.default.existsSync(output)) {
-														_context11.next = 7;
+														_context12.next = 7;
 														break;
 													}
 
-													return _context11.abrupt('return');
+													return _context12.abrupt('return');
 
 												case 7:
 													if (!conf.build) {
-														_context11.next = 10;
+														_context12.next = 10;
 														break;
 													}
 
-													_context11.next = 10;
+													_context12.next = 10;
 													return _promise2.default.all(conf.build, { cwd: output });
 
 												case 10:
 												case 'end':
-													return _context11.stop();
+													return _context12.stop();
 											}
 										}
-									}, _callee11, _this5);
+									}, _callee12, _this5);
 								}))]
 								// await runShell(
 								// 	`mkdir -p ${dest} && cd ${dest} && tar -zcf ${conf.name}.${conf.version}.tar.gz -C ${output} . && echo '${conf.name}.${conf.version}' > version`
@@ -787,14 +831,14 @@ var Kgr = function () {
 
 							case 2:
 							case 'end':
-								return _context12.stop();
+								return _context13.stop();
 						}
 					}
-				}, _callee12, this);
+				}, _callee13, this);
 			}));
 
 			function build(_x5) {
-				return _ref11.apply(this, arguments);
+				return _ref12.apply(this, arguments);
 			}
 
 			return build;
@@ -802,19 +846,19 @@ var Kgr = function () {
 	}, {
 		key: 'run',
 		value: function () {
-			var _ref14 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee13() {
+			var _ref15 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee14() {
 				var args, name, mode;
-				return _regenerator2.default.wrap(function _callee13$(_context13) {
+				return _regenerator2.default.wrap(function _callee14$(_context14) {
 					while (1) {
-						switch (_context13.prev = _context13.next) {
+						switch (_context14.prev = _context14.next) {
 							case 0:
-								_context13.prev = 0;
+								_context14.prev = 0;
 								args = this.getArgs();
 								name = args.name || this.setConfig()[0].name;
 								mode = args.mode || 'dev';
 
 								if (name) {
-									_context13.next = 6;
+									_context14.next = 6;
 									break;
 								}
 
@@ -822,42 +866,42 @@ var Kgr = function () {
 
 							case 6:
 								if (!(mode === 'dev')) {
-									_context13.next = 9;
+									_context14.next = 9;
 									break;
 								}
 
-								_context13.next = 9;
+								_context14.next = 9;
 								return this.dev(name);
 
 							case 9:
 								if (!(mode === 'build')) {
-									_context13.next = 12;
+									_context14.next = 12;
 									break;
 								}
 
-								_context13.next = 12;
+								_context14.next = 12;
 								return this.build(name);
 
 							case 12:
-								_context13.next = 17;
+								_context14.next = 17;
 								break;
 
 							case 14:
-								_context13.prev = 14;
-								_context13.t0 = _context13['catch'](0);
+								_context14.prev = 14;
+								_context14.t0 = _context14['catch'](0);
 
-								console.error(_context13.t0);
+								console.error(_context14.t0);
 
 							case 17:
 							case 'end':
-								return _context13.stop();
+								return _context14.stop();
 						}
 					}
-				}, _callee13, this, [[0, 14]]);
+				}, _callee14, this, [[0, 14]]);
 			}));
 
 			function run() {
-				return _ref14.apply(this, arguments);
+				return _ref15.apply(this, arguments);
 			}
 
 			return run;
