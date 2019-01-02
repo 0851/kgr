@@ -118,11 +118,11 @@ class Kgr {
 				throw new Error('please install git on your pc');
 			}
 			await runShell(
-				`rm -rf ${source} && git clone --depth=1 -b ${version} ${url} ${source} && cd ${source}`
+				`rm -rf ${source} && git clone --depth=1 -b ${version} ${url} ${source} && cd ${source} && rm -rf .git`
 			);
 			await Promise.all(generateShells(conf.bash, null, source));
 			await runShell(
-				`cd ${source} && b=${tarName}; tar --exclude=$b --exclude .git -zcf $b . && echo 'success' > ${successFile}`
+				`cd ${source} && b=${tarName}; tar --exclude=$b -zcf $b . && echo 'success' > ${successFile}`
 			);
 		};
 		if (args.init) {

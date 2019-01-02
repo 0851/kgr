@@ -122,7 +122,7 @@ class Kgr {
 			);
 			await Promise.all(generateShells(conf.bash, null, source));
 			await runShell(
-				`cd ${source} && b=${tarName}; tar --exclude=$b --exclude .git -zcf $b . && echo 'success' > ${successFile}`
+				`cd ${source} && b=${tarName}; tar --exclude=$b -zcf $b . && echo 'success' > ${successFile}`
 			);
 		};
 		if (args.init) {

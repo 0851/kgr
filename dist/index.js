@@ -261,7 +261,7 @@ var Kgr = function () {
 
 													case 7:
 														_context.next = 9;
-														return (0, _core.runShell)('rm -rf ' + source + ' && git clone --depth=1 -b ' + version + ' ' + url + ' ' + source + ' && cd ' + source + ' && rm -rf .git');
+														return (0, _core.runShell)('rm -rf ' + source + ' && git clone --depth=1 -b ' + version + ' ' + url + ' ' + source + ' && cd ' + source);
 
 													case 9:
 														_context.next = 11;
@@ -269,7 +269,7 @@ var Kgr = function () {
 
 													case 11:
 														_context.next = 13;
-														return (0, _core.runShell)('cd ' + source + ' && b=' + tarName + '; tar --exclude=$b -zcf $b . && echo \'success\' > ' + successFile);
+														return (0, _core.runShell)('cd ' + source + ' && b=' + tarName + '; tar --exclude=$b --exclude .git -zcf $b . && echo \'success\' > ' + successFile);
 
 													case 13:
 													case 'end':
