@@ -16,6 +16,8 @@ commander
     .option('-n, --name [name]', 'run project name , default find first name in config file', '')
     .option('--init [init]', 'init project', '')
     .option('--copy [copy]', 'copy project', '')
+    .option('--repull [repull]', 'repull project', '')
+    .option('--retar [retar]', 'retar project', '')
     .parse(process.argv)
 
 export default new Kgr(commander).run();

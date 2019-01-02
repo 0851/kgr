@@ -112,6 +112,12 @@ class Kgr {
 		let versionFile = `.kgr_version_${conf.version}`;
 		let tarName = `${conf.name}-${version}.tar.gz`;
 
+		const tar = async ()=>{
+			await runShell(
+				`cd ${source} && b=${tarName}; tar --exclude=$b --exclude .git --exclude ${successFile} -zcf $b . && echo 'success' > ${successFile}`
+			);
+		}
+
 		const _init = async () => {
 			const { stdout, stderr } = await runShell('git version');
 			if (!/version/.test(stdout)) {
@@ -121,12 +127,20 @@ class Kgr {
 				`rm -rf ${source} && git clone --depth=1 -b ${version} ${url} ${source} && cd ${source}`
 			);
 			await Promise.all(generateShells(conf.bash, null, source));
-			await runShell(
-				`cd ${source} && b=${tarName}; tar --exclude=$b --exclude .git -zcf $b . && echo 'success' > ${successFile}`
-			);
+			await tar();
 		};
+		
 		if (args.init) {
 			await _init();
+		}
+		if (args.repull){
+			await runShell(
+				`cd ${source} && git pull`
+			);
+			await tar();
+		}
+		if (args.retar){
+			await tar();
 		}
 		if (!fs.existsSync(path.resolve(source, successFile))) {
 			await _init();
