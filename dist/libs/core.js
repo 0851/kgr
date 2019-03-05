@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.gulpChangeByLine = exports.diffSourceAndDist = exports.getExistsReplace = exports.getFiles = exports.gulpAddReplace = exports.generateShells = exports.findDependen = exports.tasks = exports.runShell = exports.getAbsPath = undefined;
 
+var _keys = require('babel-runtime/core-js/object/keys');
+
+var _keys2 = _interopRequireDefault(_keys);
+
 var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
@@ -21,10 +25,6 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
-var _reduce2 = require('lodash/reduce');
-
-var _reduce3 = _interopRequireDefault(_reduce2);
-
 var _filter2 = require('lodash/filter');
 
 var _filter3 = _interopRequireDefault(_filter2);
@@ -32,6 +32,10 @@ var _filter3 = _interopRequireDefault(_filter2);
 var _keyBy2 = require('lodash/keyBy');
 
 var _keyBy3 = _interopRequireDefault(_keyBy2);
+
+var _reduce2 = require('lodash/reduce');
+
+var _reduce3 = _interopRequireDefault(_reduce2);
 
 var _find3 = require('lodash/find');
 
@@ -126,9 +130,9 @@ var tasks = function () {
     };
 }();
 
-var _path = require('path');
+var _path2 = require('path');
 
-var _path2 = _interopRequireDefault(_path);
+var _path3 = _interopRequireDefault(_path2);
 
 var _debug = require('debug');
 
@@ -191,8 +195,8 @@ var findDependen = function () {
 
                         _loop = function _loop() {
                             var file = files.shift();
-                            if (_path2.default.extname(file) === '') {
-                                files.push('' + _path2.default.resolve(file, 'index.js'));
+                            if (_path3.default.extname(file) === '') {
+                                files.push('' + _path3.default.resolve(file, 'index.js'));
                                 files.push(file + '.js');
                                 return 'continue';
                             }
@@ -208,7 +212,7 @@ var findDependen = function () {
 
                             result.push(file);
                             var dep = (0, _map3.default)((0, _detectImportRequire2.default)(content), function (f) {
-                                return getAbsPath(f, _path2.default.dirname(file));
+                                return getAbsPath(f, _path3.default.dirname(file));
                             });
                             files = files.concat(dep);
                         };
@@ -249,10 +253,10 @@ var findDependen = function () {
 }();
 
 function getAbsPath(output, base) {
-    var isAbs = _path2.default.isAbsolute(output);
+    var isAbs = _path3.default.isAbsolute(output);
     base = base || process.cwd();
     log('base cwd ' + base);
-    output = isAbs ? output : _path2.default.resolve(base, output);
+    output = isAbs ? output : _path3.default.resolve(base, output);
     return output;
 }
 
@@ -348,7 +352,7 @@ function gulpAddReplace(files, source) {
         var vl = new _vinyl2.default({
             cwd: source,
             base: source,
-            path: '' + _path2.default.resolve(source, add.target),
+            path: '' + _path3.default.resolve(source, add.target),
             contents: content
         });
         vl.is_append = true;
@@ -365,6 +369,31 @@ function gulpChangeByLine(options) {
             return;
         }
         var relative = file.relative;
+
+        options = (0, _reduce3.default)((0, _keys2.default)(options), function (res, option) {
+            var _path = option.split(':');
+            var _file = _path[0];
+            var _number = _path[1];
+            var _range = _number.split('-');
+            if (_range.length > 1) {
+                if (!/^\d+$/.test(_range[0]) || !/^\d+$/.test(_range[1])) {
+                    return;
+                }
+                var _start = parseInt(_range[0]);
+                var _end = parseInt(_range[1]);
+                for (var i = _start; i <= _end; i++) {
+                    if (i === parseInt(_range[0])) {
+                        res[_file + ':' + i] = options[option];
+                    } else {
+                        res[_file + ':' + i] = '';
+                    }
+                }
+            } else {
+                res[option] = options[option];
+            }
+
+            return res;
+        }, {});
 
         var contents = file.contents.toString('utf8').replace(/\r\n/, '\n').replace(/\r/, '\n').split(/\n/);
 
@@ -404,13 +433,13 @@ function generateShells(bash, config, root) {
     var shells = (0, _reduce3.default)(bash, function (res, b) {
         if ((0, _isString3.default)(b)) {
             var conf = (0, _extends3.default)({}, config);
-            conf.cwd = _path2.default.resolve(root, conf.cwd || '');
+            conf.cwd = _path3.default.resolve(root, conf.cwd || '');
             res.push(runShell(b, conf));
         }
         if ((0, _isArray3.default)(b)) {
             var st = b[0];
             var _conf = (0, _extends3.default)({}, config, b[1]);
-            _conf.cwd = _path2.default.resolve(root, _conf.cwd || '');
+            _conf.cwd = _path3.default.resolve(root, _conf.cwd || '');
             res.push(runShell(st, _conf));
         }
         return res;
