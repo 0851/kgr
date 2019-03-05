@@ -37,6 +37,10 @@ var _reduce2 = require('lodash/reduce');
 
 var _reduce3 = _interopRequireDefault(_reduce2);
 
+var _isObject2 = require('lodash/isObject');
+
+var _isObject3 = _interopRequireDefault(_isObject2);
+
 var _find3 = require('lodash/find');
 
 var _find4 = _interopRequireDefault(_find3);
@@ -362,6 +366,31 @@ function gulpAddReplace(files, source) {
 }
 
 function gulpChangeByLine(options) {
+    options = (0, _isObject3.default)(options) ? options : {};
+    options = (0, _reduce3.default)((0, _keys2.default)(options), function (res, option) {
+        var _path = option.split(':');
+        var _file = _path[0];
+        var _number = _path[1];
+        var _range = _number.split('-');
+        if (_range.length > 1) {
+            if (!/^\d+$/.test(_range[0]) || !/^\d+$/.test(_range[1])) {
+                return;
+            }
+            var _start = parseInt(_range[0]);
+            var _end = parseInt(_range[1]);
+            for (var i = _start; i <= _end; i++) {
+                if (i === parseInt(_range[0])) {
+                    res[_file + ':' + i] = options[option];
+                } else {
+                    res[_file + ':' + i] = '';
+                }
+            }
+        } else {
+            res[option] = options[option];
+        }
+
+        return res;
+    }, {});
     return _through2.default.obj(function (file, enc, cb) {
         if (!file.isBuffer()) {
             this.push(file);
@@ -369,32 +398,6 @@ function gulpChangeByLine(options) {
             return;
         }
         var relative = file.relative;
-
-        options = (0, _reduce3.default)((0, _keys2.default)(options), function (res, option) {
-            var _path = option.split(':');
-            var _file = _path[0];
-            var _number = _path[1];
-            var _range = _number.split('-');
-            if (_range.length > 1) {
-                if (!/^\d+$/.test(_range[0]) || !/^\d+$/.test(_range[1])) {
-                    return;
-                }
-                var _start = parseInt(_range[0]);
-                var _end = parseInt(_range[1]);
-                for (var i = _start; i <= _end; i++) {
-                    if (i === parseInt(_range[0])) {
-                        res[_file + ':' + i] = options[option];
-                    } else {
-                        res[_file + ':' + i] = '';
-                    }
-                }
-            } else {
-                res[option] = options[option];
-            }
-
-            return res;
-        }, {});
-
         var contents = file.contents.toString('utf8').replace(/\r\n/, '\n').replace(/\r/, '\n').split(/\n/);
 
         contents = contents.map(function (text, number) {

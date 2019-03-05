@@ -183,6 +183,31 @@ function gulpAddReplace(files, source) {
 }
 
 function gulpChangeByLine(options) {
+    options = _.isObject(options) ? options : {};
+    options = _.reduce(Object.keys(options), (res, option) => {
+        const _path = option.split(':');
+        const _file = _path[0];
+        const _number = _path[1];
+        const _range = _number.split('-');
+        if (_range.length > 1) {
+            if (!/^\d+$/.test(_range[0]) || !/^\d+$/.test(_range[1])) {
+                return
+            }
+            let _start = parseInt(_range[0]);
+            let _end = parseInt(_range[1]);
+            for (let i = _start; i <= _end; i++) {
+                if (i === parseInt(_range[0])) {
+                    res[`${_file}:${i}`] = options[option];
+                } else {
+                    res[`${_file}:${i}`] = '';
+                }
+            }
+        } else {
+            res[option] = options[option]
+        }
+
+        return res;
+    }, {});
     return through.obj(function (file, enc, cb) {
         if (!file.isBuffer()) {
             this.push(file);
@@ -191,32 +216,6 @@ function gulpChangeByLine(options) {
 
         }
         const relative = file.relative;
-
-        options = _.reduce(Object.keys(options), (res, option) => {
-            const _path = option.split(':');
-            const _file = _path[0];
-            const _number = _path[1];
-            const _range = _number.split('-');
-            if (_range.length > 1) {
-                if (!/^\d+$/.test(_range[0]) || !/^\d+$/.test(_range[1])) {
-                    return
-                }
-                let _start = parseInt(_range[0]);
-                let _end = parseInt(_range[1]);
-                for (let i = _start; i <= _end; i++) {
-                    if (i === parseInt(_range[0])) {
-                        res[`${_file}:${i}`] = options[option];
-                    } else {
-                        res[`${_file}:${i}`] = '';
-                    }
-                }
-            } else {
-                res[option] = options[option]
-            }
-
-            return res;
-        }, {});
-
         let contents = file.contents.toString('utf8')
             .replace(/\r\n/, '\n')
             .replace(/\r/, '\n')
