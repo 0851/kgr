@@ -32,10 +32,11 @@ Options:
     2. `source`相对路径 , 使用当前配置文件作为依据 , `target`相对路径使用的是`.source`目录作为依据
     3. `source` 文件存在 , `target` 文件存在 --> 执行替换操作
     4. `source` 文件存在 , `target` 文件不存在 --> 执行添加操作
-5. 使用配置文件中的`pipe`参数过滤`.source`内部的所有文件 , 默认会忽略掉一些大文件 , 规则
+5. 使用配置文件中的`changeByLine`参数按文件路径和行号更改的文件 , 返回新的行内容
+6. 使用配置文件中的`pipe`参数过滤`.source`内部的所有文件 , 默认会忽略掉一些大文件 , 规则
     1. 使用glob`['./**/*','!./{bower_components,node_modules,dist,build}{,/**}','!./**/*.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}']`
     2. 可在配置文件中添加`glob`数组, 追加已经忽略的文件 如 `"glob":["./node_modules/kpc/src/components/*.js"]`
-6. `dev` 模式下会监听配置文件,`replace`参数内的源文件改动 , 重新执行`2`,`3`,`4`步骤 ; `build`模式下将会导出`tar.gz`的文件到指定的`output`目录下,如`output`不存在,只做提示不做任何处理
+7. `dev` 模式下会监听配置文件,`replace`参数内的源文件改动 , 重新执行`2`,`3`,`4`步骤 ; `build`模式下将会导出`tar.gz`的文件到指定的`output`目录下,如`output`不存在,只做提示不做任何处理
 
 
 
@@ -61,7 +62,12 @@ module.exports = function () {
             //项目名 , 如没有output参数时,做导出目录的目录名
             name: 'components',
             //需要执行的初始化命令 , 支持数组 , 多命令并行 , 数组内部 第二个 为传递给shell 的参数 可用来指定执行目录等, 目录会添加输出目录作为根目录
-            bash: ['npm install lodash --verbose',['npm install lodash --verbose',{cwd:'v1'}]],
+            bash: [
+                'npm install lodash --verbose',
+                [
+                    'npm install lodash --verbose',{cwd:'v1'}
+                ]
+            ],
             //启动命令 ,mode dev时执行 支持数组 , 多命令并行 , 数组内部 第二个 为传递给shell 的参数 可用来指定执行目录等, 目录会添加输出目录作为根目录
             start: 'ls',
             //文件改变后命令 , 空代表改变文件后不触发操作 , mode dev 时执行 支持数组 , 多命令并行 , 数组内部 第二个 为传递给shell 的参数 可用来指定执行目录等, 目录会添加输出目录作为根目录
@@ -72,14 +78,22 @@ module.exports = function () {
             remote: 'http://xxxx/xxxx/xxx.git',
             //分支
             version: 'yinhe-20190921-pbc-v1',
-            glob: ['!./output/**/*','./output/test/*.js'],
-            pipe: [ //请使用 [gulp-replace语法](https://www.npmjs.com/package/gulp-replace)
-                ['console.ksyun.com', '{$common.sss}'],
-                ['ksyun', 'lkkl'],
-                ['com', function () {
-                    return this.file.relative
-                }]
+            glob: [
+                '!./output/**/*',
+                './output/test/*.js'
             ],
+            changeByLine: {
+                "v2/node_modules/ksc-vue-ui2/index.js:200": function(number,text){
+                    return ''
+                }
+            },
+            pipe: {  //请使用 [gulp-replace语法](https://www.npmjs.com/package/gulp-replace)
+                'console.ksyun.com': '{$common.sss}',
+                'ksyun':'lkkl',
+                'com': function () {
+                    return this.file.relative
+                }
+            },
             // 新增与替换资源路径
             //`source`路径不能为空,相对路径时以配置文件所在位置查找;
             //`target`路径不能为空,相对路径时以输出目录作为依据

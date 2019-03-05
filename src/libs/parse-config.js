@@ -9,18 +9,18 @@ import pkg from "../../package.json";
 const log = debug(`${pkg.name}:parse`);
 
 function readConfig(config) {
-    log(`config ---> ${JSON.stringify(config)}`)
+    log(`config ---> ${JSON.stringify(config)}`);
 
     if (!config) {
         return []
     }
     config = _.map(config, (conf) => {
         return getAbsPath(conf)
-    })
-    log(`config ---> ${JSON.stringify(config)}`)
+    });
+    log(`config ---> ${JSON.stringify(config)}`);
 
     const files = globby.sync(config);
-    log(`files ---> ${JSON.stringify(files)}`)
+    log(`files ---> ${JSON.stringify(files)}`);
     const options = _.reduce(files, (res, file) => {
         if (!/js(on)?$/.test(file)) {
             return res;
@@ -44,7 +44,7 @@ function readConfig(config) {
         obj = _.map(obj, (o) => {
             o.__filename = file
             return o
-        })
+        });
         const verification = verifyConfig(obj);
         if (verification.ok !== true) {
             throw new Error(`${chalk.red.underline(`config verify error : '${verification.message}' ; config file path ${file}`)}`)
@@ -62,7 +62,7 @@ function verifyConfig(options) {
         let mustInput = ['name', 'remote', 'version'];
         let choiceInput = [];
         const keys = Object.keys(option);
-        log(`keys ---> ${keys}`)
+        log(`keys ---> ${keys}`);
         while (mustInput.length) {
             let must = mustInput.shift();
             if (!keys.includes(must)) {
@@ -113,7 +113,7 @@ function verifyConfig(options) {
         ok: false,
         message: '参数验证失败'
     });
-    log(`verify ---> ${JSON.stringify(result)}`)
+    log(`verify ---> ${JSON.stringify(result)}`);
     return result;
 }
 
