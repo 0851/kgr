@@ -181,7 +181,7 @@ var Kgr = function () {
                                 output = this.outputPath(conf);
                                 successFile = '.kgr_success';
                                 versionFile = '.kgr_version_' + conf.version;
-                                tarName = conf.name + '-' + version + '.tar.gz';
+                                tarName = '../' + conf.name + '-' + version + '.tar.gz';
 
                                 tar = function () {
                                     var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
@@ -190,7 +190,7 @@ var Kgr = function () {
                                                 switch (_context.prev = _context.next) {
                                                     case 0:
                                                         _context.next = 2;
-                                                        return (0, _core.runShell)('cd ' + source + ' && b=' + tarName + ' && rm -rf $b && tar --exclude=$b --exclude .git --exclude ' + successFile + ' -zcf $b . && echo \'success\' > ' + successFile);
+                                                        return (0, _core.runShell)('cd ' + source + ' && b=' + tarName + ' tar --exclude .git --exclude ' + successFile + ' -zcf $b . && echo \'success\' > ' + successFile);
 
                                                     case 2:
                                                     case 'end':

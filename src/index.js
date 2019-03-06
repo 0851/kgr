@@ -84,11 +84,11 @@ class Kgr {
         const output = this.outputPath(conf);
         let successFile = `.kgr_success`;
         let versionFile = `.kgr_version_${conf.version}`;
-        let tarName = `${conf.name}-${version}.tar.gz`;
+        let tarName = `../${conf.name}-${version}.tar.gz`;
 
         const tar = async () => {
             await runShell(
-                `cd ${source} && b=${tarName} && rm -rf $b && tar --exclude=$b --exclude .git --exclude ${successFile} -zcf $b . && echo 'success' > ${successFile}`
+                `cd ${source} && b=${tarName} tar --exclude .git --exclude ${successFile} -zcf $b . && echo 'success' > ${successFile}`
             );
         }
 
