@@ -190,7 +190,7 @@ var Kgr = function () {
                                                 switch (_context.prev = _context.next) {
                                                     case 0:
                                                         _context.next = 2;
-                                                        return (0, _core.runShell)('cd ' + source + ' && b=' + tarName + '; tar --exclude=$b --exclude .git --exclude ' + successFile + ' -zcf $b . && echo \'success\' > ' + successFile);
+                                                        return (0, _core.runShell)('cd ' + source + ' && b=' + tarName + ' rm -rf $b && tar --exclude=$b --exclude .git --exclude ' + successFile + ' -zcf $b . && echo \'success\' > ' + successFile);
 
                                                     case 2:
                                                     case 'end':
