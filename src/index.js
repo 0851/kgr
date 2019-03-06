@@ -88,7 +88,7 @@ class Kgr {
 
         const tar = async () => {
             await runShell(
-                `cd ${source} && b=${tarName} rm -rf $b && tar --exclude=$b --exclude .git --exclude ${successFile} -zcf $b . && echo 'success' > ${successFile}`
+                `cd ${source} && b=${tarName} && rm -rf $b && tar --exclude=$b --exclude .git --exclude ${successFile} -zcf $b . && echo 'success' > ${successFile}`
             );
         }
 
