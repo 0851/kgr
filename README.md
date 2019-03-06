@@ -87,13 +87,13 @@ module.exports = function () {
                     return ''
                 }
             },
-            pipe: {  //请使用 [gulp-replace语法](https://www.npmjs.com/package/gulp-replace)
-                'console.ksyun.com': '{$common.sss}',
-                'ksyun':'lkkl',
-                'com': function () {
+            pipe: [  //请使用 [gulp-replace语法](https://www.npmjs.com/package/gulp-replace)
+                ['console.ksyun.com', '{$common.sss}'],
+                ['ksyun','lkkl'],
+                ['com', function () {
                     return this.file.relative
-                }
-            },
+                }]
+            ],
             // 新增与替换资源路径
             //`source`路径不能为空,相对路径时以配置文件所在位置查找;
             //`target`路径不能为空,相对路径时以输出目录作为依据
