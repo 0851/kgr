@@ -1,6 +1,6 @@
 {
   "name": "kgr",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "project gardener",
   "main": "dist/index.js",
   "scripts": {
