@@ -279,7 +279,8 @@ function runShell(cmd) {
             FORCE_COLOR: true,
             COLOR: 'always',
             NPM_CONFIG_COLOR: 'always'
-        }, process.env, options.env || {})
+        }, process.env, options.env || {}),
+        cwd: process.cwd()
     }, options));
     child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);

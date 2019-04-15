@@ -117,6 +117,8 @@ var Kgr = function () {
     (0, _createClass3.default)(Kgr, [{
         key: 'setArgs',
         value: function setArgs(args) {
+            args.source = args.source || '.source';
+            args.output = args.output || 'output';
             this.args = args;
         }
     }, {
@@ -145,18 +147,16 @@ var Kgr = function () {
         }
     }, {
         key: 'sourcePath',
-        value: function sourcePath(conf) {
-            var version = conf.version;
-            var source = this.getArgs().source || '.source';
+        value: function sourcePath() {
+            var source = this.getArgs().source;
             source = (0, _core.getAbsPath)(source);
-            source = _path2.default.resolve(source, version);
+            source = _path2.default.resolve(source);
             return source;
         }
     }, {
         key: 'outputPath',
-        value: function outputPath(conf) {
-            var version = conf.version;
-            var output = this.getArgs().output || 'output';
+        value: function outputPath() {
+            var output = this.getArgs().output;
             output = (0, _core.getAbsPath)(output);
             output = _path2.default.resolve(output);
             return output;
@@ -167,7 +167,7 @@ var Kgr = function () {
             var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(name) {
                 var _this = this;
 
-                var conf, args, url, version, source, output, successFile, versionFile, tarName, tar, _init, _copyOutput;
+                var conf, args, url, version, source, output, sourcePath, outputPath, successFile, versionFile, tarName, tar, _init, _copyOutput;
 
                 return _regenerator2.default.wrap(function _callee4$(_context4) {
                     while (1) {
@@ -177,11 +177,13 @@ var Kgr = function () {
                                 args = this.getArgs();
                                 url = conf.remote;
                                 version = conf.version;
-                                source = this.sourcePath(conf);
-                                output = this.outputPath(conf);
+                                source = conf.source;
+                                output = conf.output;
+                                sourcePath = this.sourcePath(conf);
+                                outputPath = this.outputPath(conf);
                                 successFile = '.kgr_success';
                                 versionFile = '.kgr_version_' + conf.version;
-                                tarName = '../' + conf.name + '-' + version + '.tar.gz';
+                                tarName = conf.name + '-' + version + '.tar.gz';
 
                                 tar = function () {
                                     var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
@@ -190,7 +192,9 @@ var Kgr = function () {
                                                 switch (_context.prev = _context.next) {
                                                     case 0:
                                                         _context.next = 2;
-                                                        return (0, _core.runShell)('cd ' + source + ' && b=' + tarName + ' && tar --exclude .git --exclude ' + successFile + ' -zcf $b . && echo \'success\' > ' + successFile);
+                                                        return (0, _core.runShell)('cd ' + version + ' && $b=../' + tarName + ' && tar --exclude .git --exclude ' + successFile + ' -zcf $b . && echo \'success\' > ' + successFile, {
+                                                            cwd: sourcePath
+                                                        });
 
                                                     case 2:
                                                     case 'end':
@@ -230,11 +234,13 @@ var Kgr = function () {
 
                                                     case 7:
                                                         _context2.next = 9;
-                                                        return (0, _core.runShell)('rm -rf ' + source + ' && git clone --depth=1 -b ' + version + ' ' + url + ' ' + source + ' && cd ' + source);
+                                                        return (0, _core.runShell)('rm -rf ' + version + ' && git clone --depth=1 -b ' + version + ' ' + url + ' ' + version + ' && cd ' + version, {
+                                                            cwd: sourcePath
+                                                        });
 
                                                     case 9:
                                                         _context2.next = 11;
-                                                        return _promise2.default.all((0, _core.generateShells)(conf.bash, null, source));
+                                                        return _promise2.default.all((0, _core.generateShells)(conf.bash, null, _path2.default.resolve(sourcePath, version)));
 
                                                     case 11:
                                                         _context2.next = 13;
@@ -254,45 +260,47 @@ var Kgr = function () {
                                 }();
 
                                 if (!args.init) {
-                                    _context4.next = 14;
+                                    _context4.next = 16;
                                     break;
                                 }
 
-                                _context4.next = 14;
+                                _context4.next = 16;
                                 return _init();
 
-                            case 14:
+                            case 16:
                                 if (!args.repull) {
-                                    _context4.next = 19;
+                                    _context4.next = 21;
                                     break;
                                 }
 
-                                _context4.next = 17;
-                                return (0, _core.runShell)('cd ' + source + ' && git pull');
-
-                            case 17:
                                 _context4.next = 19;
-                                return tar();
+                                return (0, _core.runShell)('git pull', {
+                                    cwd: _path2.default.resolve(sourcePath, version)
+                                });
 
                             case 19:
-                                if (!args.retar) {
-                                    _context4.next = 22;
-                                    break;
-                                }
-
-                                _context4.next = 22;
+                                _context4.next = 21;
                                 return tar();
 
-                            case 22:
-                                if (_fs2.default.existsSync(_path2.default.resolve(source, successFile))) {
-                                    _context4.next = 25;
+                            case 21:
+                                if (!args.retar) {
+                                    _context4.next = 24;
                                     break;
                                 }
 
-                                _context4.next = 25;
+                                _context4.next = 24;
+                                return tar();
+
+                            case 24:
+                                if (_fs2.default.existsSync(_path2.default.resolve(sourcePath, successFile))) {
+                                    _context4.next = 27;
+                                    break;
+                                }
+
+                                _context4.next = 27;
                                 return _init();
 
-                            case 25:
+                            case 27:
                                 _copyOutput = function () {
                                     var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
                                         return _regenerator2.default.wrap(function _callee3$(_context3) {
@@ -301,7 +309,7 @@ var Kgr = function () {
                                                     case 0:
                                                         log('cp start');
                                                         _context3.next = 3;
-                                                        return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && tar -zxf ' + _path2.default.resolve(source, tarName) + ' && echo \'' + version + '\' > ' + versionFile);
+                                                        return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && tar -zxf ' + _path2.default.resolve(sourcePath, tarName) + ' && echo \'' + version + '\' > ' + versionFile);
 
                                                     case 3:
                                                         log('cp end');
@@ -320,26 +328,26 @@ var Kgr = function () {
                                 }();
 
                                 if (!args.copy) {
-                                    _context4.next = 29;
+                                    _context4.next = 31;
                                     break;
                                 }
 
-                                _context4.next = 29;
+                                _context4.next = 31;
                                 return _copyOutput();
 
-                            case 29:
-                                if (_fs2.default.existsSync(_path2.default.resolve(output, '' + versionFile))) {
-                                    _context4.next = 32;
+                            case 31:
+                                if (_fs2.default.existsSync(_path2.default.resolve(outputPath, '' + versionFile))) {
+                                    _context4.next = 34;
                                     break;
                                 }
 
-                                _context4.next = 32;
+                                _context4.next = 34;
                                 return _copyOutput();
 
-                            case 32:
+                            case 34:
                                 return _context4.abrupt('return', conf);
 
-                            case 33:
+                            case 35:
                             case 'end':
                                 return _context4.stop();
                         }
@@ -363,7 +371,7 @@ var Kgr = function () {
                     var self = _this2;
                     var conf = _this2.configForName(name);
                     console.log('' + _chalk2.default.green('run pipe task...'));
-                    var tmp = _this2.sourcePath(conf);
+                    var tmp = _path2.default.resolve(_this2.sourcePath(conf), conf.version);
                     var output = _this2.outputPath(conf);
                     var opt = { base: tmp, cwd: tmp };
                     var glob = ['**/{*,.*}', '!**/package.json', '!**/package-lock.json', '!**/yarn.lock', '!**/{bower_components,node_modules,dist,build}/**', '!**/{*,.*}.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'];
