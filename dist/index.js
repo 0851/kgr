@@ -449,8 +449,8 @@ var Kgr = function () {
                     log('gulp content replace end');
                     log('gulp record start');
                     stream = stream.pipe(_through2.default.obj(function (file, encoding, cb) {
-                        console.log(file.relative, '=======');
-                        sourceFiles.push(file.relative);
+                        var relative = file.relative.split(_path2.default.sep).join('/'); //兼容window做处理
+                        sourceFiles.push(relative);
                         var contents = file.checksum;
                         if (file.isBuffer()) {
                             contents = file.contents.toString('utf8');
@@ -481,8 +481,8 @@ var Kgr = function () {
                         log('clean start');
                         //清理已删除或不应存在在output目录中的文件
                         var distFiles = _globby2.default.sync(glob, { base: output, cwd: output });
-                        console.log('sourceFiles ' + (0, _stringify2.default)(sourceFiles));
-                        console.log('distFiles ' + (0, _stringify2.default)(distFiles));
+                        log('sourceFiles ' + (0, _stringify2.default)(sourceFiles));
+                        log('distFiles ' + (0, _stringify2.default)(distFiles));
 
                         var versionFile = '.kgr_version_' + conf.version;
                         //删除时清除缓存 , 以便下次重建

@@ -244,8 +244,8 @@ class Kgr {
                 log(`gulp content replace end`);
                 log(`gulp record start`);
                 stream = stream.pipe(through.obj(function (file, encoding, cb) {
-                    console.log(file.relative, '=======')
-                    sourceFiles.push(file.relative);
+                    let relative = file.relative.split(path.sep).join('/'); //兼容window做处理
+                    sourceFiles.push(relative);
                     let contents = file.checksum;
                     if (file.isBuffer()) {
                         contents = file.contents.toString('utf8');
@@ -276,8 +276,8 @@ class Kgr {
                     log(`clean start`);
                     //清理已删除或不应存在在output目录中的文件
                     const distFiles = globby.sync(glob, {base: output, cwd: output});
-                    console.log(`sourceFiles ${JSON.stringify(sourceFiles)}`);
-                    console.log(`distFiles ${JSON.stringify(distFiles)}`);
+                    log(`sourceFiles ${JSON.stringify(sourceFiles)}`);
+                    log(`distFiles ${JSON.stringify(distFiles)}`);
 
                     let versionFile = `.kgr_version_${conf.version}`;
                     //删除时清除缓存 , 以便下次重建
