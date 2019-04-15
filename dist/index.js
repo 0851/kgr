@@ -303,19 +303,24 @@ var Kgr = function () {
                             case 27:
                                 _copyOutput = function () {
                                     var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
+                                        var tarPath;
                                         return _regenerator2.default.wrap(function _callee3$(_context3) {
                                             while (1) {
                                                 switch (_context3.prev = _context3.next) {
                                                     case 0:
                                                         log('cp start');
-                                                        console.log('&& tar -zxf ' + _path2.default.relative(outputPath, _path2.default.resolve(sourcePath, tarName)) + ' ');
-                                                        _context3.next = 4;
-                                                        return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && echo \'' + version + '\' > ' + versionFile);
+                                                        tarPath = _path2.default.relative(outputPath, _path2.default.resolve(sourcePath, tarName)).split(_path2.default.sep).join('/');
 
-                                                    case 4:
-                                                        log('cp end');
+
+                                                        console.log('tar -zxf ' + tarPath + ' ');
+
+                                                        _context3.next = 5;
+                                                        return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && tar -zxf ' + tarPath + ' && echo \'' + version + '\' > ' + versionFile);
 
                                                     case 5:
+                                                        log('cp end');
+
+                                                    case 6:
                                                     case 'end':
                                                         return _context3.stop();
                                                 }

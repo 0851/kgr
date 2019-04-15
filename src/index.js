@@ -132,9 +132,14 @@ class Kgr {
 
         const _copyOutput = async () => {
             log('cp start');
-            console.log(`&& tar -zxf ${path.relative(outputPath, path.resolve(sourcePath, tarName))} `)
+            const tarPath = path
+                .relative(outputPath, path.resolve(sourcePath, tarName))
+                .split(path.sep).join('/');
+
+            console.log(`tar -zxf ${tarPath} `);
+            
             await runShell(
-                `rm -rf ${output} && mkdir -p ${output} && cd ${output} && echo '${version}' > ${versionFile}`
+                `rm -rf ${output} && mkdir -p ${output} && cd ${output} && tar -zxf ${tarPath} && echo '${version}' > ${versionFile}`
             );
             log('cp end');
         };
