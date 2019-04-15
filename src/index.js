@@ -126,14 +126,15 @@ class Kgr {
         if (args.retar) {
             await tar();
         }
-        if (!fs.existsSync(path.resolve(sourcePath, successFile))) {
+        if (!fs.existsSync(path.resolve(sourcePath, version, successFile))) {
             await _init();
         }
 
         const _copyOutput = async () => {
             log('cp start');
+            console.log(`&& tar -zxf ${path.relative(outputPath, path.resolve(sourcePath, tarName))} `)
             await runShell(
-                `rm -rf ${output} && mkdir -p ${output} && cd ${output} && tar -zxf ${path.relative(outputPath, path.resolve(sourcePath, tarName))} && echo '${version}' > ${versionFile}`
+                `rm -rf ${output} && mkdir -p ${output} && cd ${output} && echo '${version}' > ${versionFile}`
             );
             log('cp end');
         };

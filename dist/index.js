@@ -292,7 +292,7 @@ var Kgr = function () {
                                 return tar();
 
                             case 24:
-                                if (_fs2.default.existsSync(_path2.default.resolve(sourcePath, successFile))) {
+                                if (_fs2.default.existsSync(_path2.default.resolve(sourcePath, version, successFile))) {
                                     _context4.next = 27;
                                     break;
                                 }
@@ -308,13 +308,14 @@ var Kgr = function () {
                                                 switch (_context3.prev = _context3.next) {
                                                     case 0:
                                                         log('cp start');
-                                                        _context3.next = 3;
-                                                        return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && tar -zxf ' + _path2.default.relative(outputPath, _path2.default.resolve(sourcePath, tarName)) + ' && echo \'' + version + '\' > ' + versionFile);
-
-                                                    case 3:
-                                                        log('cp end');
+                                                        console.log('&& tar -zxf ' + _path2.default.relative(outputPath, _path2.default.resolve(sourcePath, tarName)) + ' ');
+                                                        _context3.next = 4;
+                                                        return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && echo \'' + version + '\' > ' + versionFile);
 
                                                     case 4:
+                                                        log('cp end');
+
+                                                    case 5:
                                                     case 'end':
                                                         return _context3.stop();
                                                 }
