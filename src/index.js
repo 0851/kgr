@@ -100,6 +100,7 @@ class Kgr {
         };
 
         const _init = async () => {
+            mkdirp.sync(source);
             const {stdout, stderr} = await runShell('git version');
             if (!/version/.test(stdout)) {
                 throw new Error('please install git on your pc');

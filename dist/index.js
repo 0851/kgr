@@ -221,36 +221,37 @@ var Kgr = function () {
                                             while (1) {
                                                 switch (_context2.prev = _context2.next) {
                                                     case 0:
-                                                        _context2.next = 2;
+                                                        _mkdirp2.default.sync(source);
+                                                        _context2.next = 3;
                                                         return (0, _core.runShell)('git version');
 
-                                                    case 2:
+                                                    case 3:
                                                         _ref4 = _context2.sent;
                                                         stdout = _ref4.stdout;
                                                         stderr = _ref4.stderr;
 
                                                         if (/version/.test(stdout)) {
-                                                            _context2.next = 7;
+                                                            _context2.next = 8;
                                                             break;
                                                         }
 
                                                         throw new Error('please install git on your pc');
 
-                                                    case 7:
-                                                        _context2.next = 9;
+                                                    case 8:
+                                                        _context2.next = 10;
                                                         return (0, _core.runShell)('rm -rf ' + version + ' && git clone --depth=1 -b ' + version + ' ' + url + ' ' + version + ' && cd ' + version, {
                                                             cwd: sourcePath
                                                         });
 
-                                                    case 9:
-                                                        _context2.next = 11;
+                                                    case 10:
+                                                        _context2.next = 12;
                                                         return _promise2.default.all((0, _core.generateShells)(conf.bash, null, _path2.default.resolve(sourcePath, version)));
 
-                                                    case 11:
-                                                        _context2.next = 13;
+                                                    case 12:
+                                                        _context2.next = 14;
                                                         return tar();
 
-                                                    case 13:
+                                                    case 14:
                                                     case 'end':
                                                         return _context2.stop();
                                                 }
