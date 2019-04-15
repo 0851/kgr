@@ -481,9 +481,9 @@ var Kgr = function () {
                         log('clean start');
                         //清理已删除或不应存在在output目录中的文件
                         var distFiles = _globby2.default.sync(glob, { base: output, cwd: output });
-                        log('sourceFiles ' + (0, _stringify2.default)(sourceFiles));
-                        log('distFiles ' + (0, _stringify2.default)(distFiles));
-                        console.log(distFiles[0]);
+                        console.log('sourceFiles ' + (0, _stringify2.default)(sourceFiles));
+                        console.log('distFiles ' + (0, _stringify2.default)(distFiles));
+
                         var versionFile = '.kgr_version_' + conf.version;
                         //删除时清除缓存 , 以便下次重建
                         var matched = (0, _core.diffSourceAndDist)(sourceFiles, distFiles);

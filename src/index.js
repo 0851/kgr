@@ -276,9 +276,9 @@ class Kgr {
                     log(`clean start`);
                     //清理已删除或不应存在在output目录中的文件
                     const distFiles = globby.sync(glob, {base: output, cwd: output});
-                    log(`sourceFiles ${JSON.stringify(sourceFiles)}`);
-                    log(`distFiles ${JSON.stringify(distFiles)}`);
-                    console.log(distFiles[0])
+                    console.log(`sourceFiles ${JSON.stringify(sourceFiles)}`);
+                    console.log(`distFiles ${JSON.stringify(distFiles)}`);
+
                     let versionFile = `.kgr_version_${conf.version}`;
                     //删除时清除缓存 , 以便下次重建
                     const matched = diffSourceAndDist(sourceFiles, distFiles);
