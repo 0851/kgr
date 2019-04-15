@@ -86,6 +86,10 @@ var _gulpReplace2 = _interopRequireDefault(_gulpReplace);
 
 var _parseConfig = require('./libs/parse-config');
 
+var _mkdirp = require('mkdirp');
+
+var _mkdirp2 = _interopRequireDefault(_mkdirp);
+
 var _core = require('./libs/core');
 
 var _package = require('../package.json');
@@ -310,17 +314,23 @@ var Kgr = function () {
                                                     case 0:
                                                         log('cp start');
                                                         tarPath = _path2.default.relative(outputPath, _path2.default.resolve(sourcePath, tarName)).split(_path2.default.sep).join('/');
+                                                        _context3.next = 4;
+                                                        return (0, _core.runShell)('rm -rf ' + output);
 
+                                                    case 4:
 
-                                                        console.log('tar -zxf ' + tarPath + ' ');
+                                                        _mkdirp2.default.sync(output);
 
-                                                        _context3.next = 5;
-                                                        return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && tar -zxf ' + tarPath + ' && echo \'' + version + '\' > ' + versionFile);
+                                                        _context3.next = 7;
+                                                        return (0, _core.runShell)('tar -zxf ' + tarPath + ' && echo \'' + version + '\' > ' + versionFile, {
+                                                            cwd: outputPath
+                                                        });
 
-                                                    case 5:
+                                                    case 7:
+
                                                         log('cp end');
 
-                                                    case 6:
+                                                    case 8:
                                                     case 'end':
                                                         return _context3.stop();
                                                 }

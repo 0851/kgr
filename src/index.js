@@ -7,6 +7,8 @@ import globby from 'globby';
 import gulp from 'gulp';
 import gulpReplace from 'gulp-replace';
 import {readConfig} from './libs/parse-config';
+import mkdirp from 'mkdirp'
+
 import {
     getAbsPath,
     tasks,
@@ -135,12 +137,20 @@ class Kgr {
             const tarPath = path
                 .relative(outputPath, path.resolve(sourcePath, tarName))
                 .split(path.sep).join('/');
-
-            console.log(`tar -zxf ${tarPath} `);
             
             await runShell(
-                `rm -rf ${output} && mkdir -p ${output} && cd ${output} && tar -zxf ${tarPath} && echo '${version}' > ${versionFile}`
+                `rm -rf ${output}`
             );
+
+            mkdirp.sync(output);
+
+            await runShell(
+                `tar -zxf ${tarPath} && echo '${version}' > ${versionFile}`,
+                {
+                    cwd: outputPath
+                }
+            );
+
             log('cp end');
         };
         if (args.copy) {
