@@ -192,7 +192,7 @@ var Kgr = function () {
                                                 switch (_context.prev = _context.next) {
                                                     case 0:
                                                         _context.next = 2;
-                                                        return (0, _core.runShell)('cd ' + version + ' && $b=../' + tarName + ' && tar --exclude .git --exclude ' + successFile + ' -zcf $b . && echo \'success\' > ' + successFile, {
+                                                        return (0, _core.runShell)('cd ' + version + ' && tar --exclude .git --exclude ' + successFile + ' -zcf ../' + tarName + ' . && echo \'success\' > ' + successFile, {
                                                             cwd: sourcePath
                                                         });
 

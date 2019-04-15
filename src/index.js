@@ -90,7 +90,7 @@ class Kgr {
 
         const tar = async () => {
             await runShell(
-                `cd ${version} && $b=../${tarName} && tar --exclude .git --exclude ${successFile} -zcf $b . && echo 'success' > ${successFile}`,
+                `cd ${version} && tar --exclude .git --exclude ${successFile} -zcf ../${tarName} . && echo 'success' > ${successFile}`,
                 {
                     cwd: sourcePath
                 }
