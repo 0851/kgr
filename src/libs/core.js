@@ -59,7 +59,8 @@ function runShell(cmd, options = {}) {
     if (!cmd) {
         return;
     }
-    console.log(chalk.green(`run shell cmd : ${cmd}`));
+    console.log(chalk.green(`run shell cmd : ${cmd} on ${options.cwd || process.cwd()}`));
+
     let child = execa(cmd, {
         ...{
             shell: true,

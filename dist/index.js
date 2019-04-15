@@ -449,6 +449,7 @@ var Kgr = function () {
                     log('gulp content replace end');
                     log('gulp record start');
                     stream = stream.pipe(_through2.default.obj(function (file, encoding, cb) {
+                        console.log(file.relative, '=======');
                         sourceFiles.push(file.relative);
                         var contents = file.checksum;
                         if (file.isBuffer()) {
@@ -482,6 +483,7 @@ var Kgr = function () {
                         var distFiles = _globby2.default.sync(glob, { base: output, cwd: output });
                         log('sourceFiles ' + (0, _stringify2.default)(sourceFiles));
                         log('distFiles ' + (0, _stringify2.default)(distFiles));
+                        console.log(distFiles[0]);
                         var versionFile = '.kgr_version_' + conf.version;
                         //删除时清除缓存 , 以便下次重建
                         var matched = (0, _core.diffSourceAndDist)(sourceFiles, distFiles);

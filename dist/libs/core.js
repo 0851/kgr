@@ -270,7 +270,8 @@ function runShell(cmd) {
     if (!cmd) {
         return;
     }
-    console.log(_chalk2.default.green('run shell cmd : ' + cmd));
+    console.log(_chalk2.default.green('run shell cmd : ' + cmd + ' on ' + (options.cwd || process.cwd())));
+
     var child = (0, _execa2.default)(cmd, (0, _extends3.default)({
         shell: true,
         maxBuffer: 1000000000,

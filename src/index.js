@@ -137,7 +137,7 @@ class Kgr {
             const tarPath = path
                 .relative(outputPath, path.resolve(sourcePath, tarName))
                 .split(path.sep).join('/');
-            
+
             await runShell(
                 `rm -rf ${output}`
             );
@@ -244,6 +244,7 @@ class Kgr {
                 log(`gulp content replace end`);
                 log(`gulp record start`);
                 stream = stream.pipe(through.obj(function (file, encoding, cb) {
+                    console.log(file.relative, '=======')
                     sourceFiles.push(file.relative);
                     let contents = file.checksum;
                     if (file.isBuffer()) {
@@ -277,6 +278,7 @@ class Kgr {
                     const distFiles = globby.sync(glob, {base: output, cwd: output});
                     log(`sourceFiles ${JSON.stringify(sourceFiles)}`);
                     log(`distFiles ${JSON.stringify(distFiles)}`);
+                    console.log(distFiles[0])
                     let versionFile = `.kgr_version_${conf.version}`;
                     //删除时清除缓存 , 以便下次重建
                     const matched = diffSourceAndDist(sourceFiles, distFiles);
