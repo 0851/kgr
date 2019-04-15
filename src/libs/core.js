@@ -73,7 +73,8 @@ function runShell(cmd, options = {}) {
                 },
                 ...process.env,
                 ...(options.env || {})
-            }
+            },
+            cwd: process.cwd()
         },
         ...options
     });

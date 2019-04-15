@@ -35,6 +35,8 @@ class Kgr {
     }
 
     setArgs(args) {
+        args.source = args.source || '.source';
+        args.output = args.output || 'output';
         this.args = args;
     }
 
@@ -59,17 +61,15 @@ class Kgr {
         return matched;
     }
 
-    sourcePath(conf) {
-        const version = conf.version;
-        let source = this.getArgs().source || '.source';
+    sourcePath() {
+        let source = this.getArgs().source;
         source = getAbsPath(source);
-        source = path.resolve(source, version);
+        source = path.resolve(source);
         return source;
     }
 
-    outputPath(conf) {
-        let version = conf.version;
-        let output = this.getArgs().output || 'output';
+    outputPath() {
+        let output = this.getArgs().output;
         output = getAbsPath(output);
         output = path.resolve(output);
         return output;
@@ -80,15 +80,20 @@ class Kgr {
         const args = this.getArgs();
         const url = conf.remote;
         const version = conf.version;
-        const source = this.sourcePath(conf);
-        const output = this.outputPath(conf);
+        let source = conf.source;
+        let output = conf.output;
+        const sourcePath = this.sourcePath(conf);
+        const outputPath = this.outputPath(conf);
         let successFile = `.kgr_success`;
         let versionFile = `.kgr_version_${conf.version}`;
-        let tarName = `../${conf.name}-${version}.tar.gz`;
+        let tarName = `${conf.name}-${version}.tar.gz`;
 
         const tar = async () => {
             await runShell(
-                `cd ${source} && b=${tarName} && tar --exclude .git --exclude ${successFile} -zcf $b . && echo 'success' > ${successFile}`
+                `cd ${version} && $b=../${tarName} && tar --exclude .git --exclude ${successFile} -zcf $b . && echo 'success' > ${successFile}`,
+                {
+                    cwd: sourcePath
+                }
             );
         };
 
@@ -98,9 +103,12 @@ class Kgr {
                 throw new Error('please install git on your pc');
             }
             await runShell(
-                `rm -rf ${source} && git clone --depth=1 -b ${version} ${url} ${source} && cd ${source}`
+                `rm -rf ${version} && git clone --depth=1 -b ${version} ${url} ${version} && cd ${version}`,
+                {
+                    cwd: sourcePath
+                }
             );
-            await Promise.all(generateShells(conf.bash, null, source));
+            await Promise.all(generateShells(conf.bash, null, path.resolve(sourcePath, version)));
             await tar();
         };
 
@@ -109,14 +117,16 @@ class Kgr {
         }
         if (args.repull) {
             await runShell(
-                `cd ${source} && git pull`
+                `git pull`, {
+                    cwd: path.resolve(sourcePath, version)
+                }
             );
             await tar();
         }
         if (args.retar) {
             await tar();
         }
-        if (!fs.existsSync(path.resolve(source, successFile))) {
+        if (!fs.existsSync(path.resolve(sourcePath, successFile))) {
             await _init();
         }
 
@@ -124,7 +134,7 @@ class Kgr {
             log('cp start');
             await runShell(
                 `rm -rf ${output} && mkdir -p ${output} && cd ${output} && tar -zxf ${path.resolve(
-                    source,
+                    sourcePath,
                     tarName
                 )} && echo '${version}' > ${versionFile}`
             );
@@ -133,7 +143,7 @@ class Kgr {
         if (args.copy) {
             await _copyOutput();
         }
-        if (!fs.existsSync(path.resolve(output, `${versionFile}`))) {
+        if (!fs.existsSync(path.resolve(outputPath, `${versionFile}`))) {
             await _copyOutput();
         }
         return conf;
@@ -145,7 +155,7 @@ class Kgr {
                 const self = this;
                 const conf = this.configForName(name);
                 console.log(`${chalk.green(`run pipe task...`)}`);
-                let tmp = this.sourcePath(conf);
+                let tmp = path.resolve(this.sourcePath(conf), conf.version);
                 let output = this.outputPath(conf);
                 const opt = {base: tmp, cwd: tmp};
                 let glob = [
