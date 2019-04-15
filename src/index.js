@@ -80,8 +80,8 @@ class Kgr {
         const args = this.getArgs();
         const url = conf.remote;
         const version = conf.version;
-        let source = conf.source;
-        let output = conf.output;
+        let source = args.source;
+        let output = args.output;
         const sourcePath = this.sourcePath(conf);
         const outputPath = this.outputPath(conf);
         let successFile = `.kgr_success`;
@@ -133,10 +133,7 @@ class Kgr {
         const _copyOutput = async () => {
             log('cp start');
             await runShell(
-                `rm -rf ${output} && mkdir -p ${output} && cd ${output} && tar -zxf ${path.resolve(
-                    sourcePath,
-                    tarName
-                )} && echo '${version}' > ${versionFile}`
+                `rm -rf ${output} && mkdir -p ${output} && cd ${output} && tar -zxf ${path.relative(outputPath, path.resolve(sourcePath, tarName))} && echo '${version}' > ${versionFile}`
             );
             log('cp end');
         };

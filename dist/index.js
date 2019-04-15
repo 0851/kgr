@@ -177,8 +177,8 @@ var Kgr = function () {
                                 args = this.getArgs();
                                 url = conf.remote;
                                 version = conf.version;
-                                source = conf.source;
-                                output = conf.output;
+                                source = args.source;
+                                output = args.output;
                                 sourcePath = this.sourcePath(conf);
                                 outputPath = this.outputPath(conf);
                                 successFile = '.kgr_success';
@@ -309,7 +309,7 @@ var Kgr = function () {
                                                     case 0:
                                                         log('cp start');
                                                         _context3.next = 3;
-                                                        return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && tar -zxf ' + _path2.default.resolve(sourcePath, tarName) + ' && echo \'' + version + '\' > ' + versionFile);
+                                                        return (0, _core.runShell)('rm -rf ' + output + ' && mkdir -p ' + output + ' && cd ' + output + ' && tar -zxf ' + _path2.default.relative(outputPath, _path2.default.resolve(sourcePath, tarName)) + ' && echo \'' + version + '\' > ' + versionFile);
 
                                                     case 3:
                                                         log('cp end');
