@@ -177,14 +177,16 @@ class Kgr {
                     '!**/package.json',
                     '!**/package-lock.json',
                     '!**/yarn.lock',
-                    '!**/{bower_components,node_modules,dist,build}/**',
-                    '!**/{*,.*}.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'
+                    '!**/{bower_components,node_modules,dist,build}/**'
                 ];
 
                 if (conf.glob) {
                     conf.glob = _.isArray(conf.glob) ? conf.glob : [conf.glob];
                     glob = glob.concat(conf.glob);
                 }
+
+                //非源码部分全部过滤
+                glob.push('!**/{*,.*}.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}');
 
                 let removeGlob = [];
                 if (conf.remove) {

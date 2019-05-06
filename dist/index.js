@@ -391,12 +391,15 @@ var Kgr = function () {
                     var tmp = _path2.default.resolve(_this2.sourcePath(conf), conf.version);
                     var output = _this2.outputPath(conf);
                     var opt = { base: tmp, cwd: tmp };
-                    var glob = ['**/{*,.*}', '!**/package.json', '!**/package-lock.json', '!**/yarn.lock', '!**/{bower_components,node_modules,dist,build}/**', '!**/{*,.*}.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}'];
+                    var glob = ['**/{*,.*}', '!**/package.json', '!**/package-lock.json', '!**/yarn.lock', '!**/{bower_components,node_modules,dist,build}/**'];
 
                     if (conf.glob) {
                         conf.glob = (0, _isArray3.default)(conf.glob) ? conf.glob : [conf.glob];
                         glob = glob.concat(conf.glob);
                     }
+
+                    //非源码部分全部过滤
+                    glob.push('!**/{*,.*}.{tar.gz,swf,mp4,webm,ogg,mp3,wav,flac,aac,png,jpg,gif,svg,eot,woff,woff2,ttf,otf,swf}');
 
                     var removeGlob = [];
                     if (conf.remove) {
