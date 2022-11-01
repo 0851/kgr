@@ -37,7 +37,7 @@
     "detect-import-require": "^2.0.0",
     "execa": "^1.0.0",
     "globby": "^8.0.1",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "gulp-cached": "^1.1.1",
     "gulp-replace": "^1.0.0",
     "lodash": "^4.17.10",
